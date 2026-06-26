@@ -1,0 +1,17 @@
+:root {
+  --lv-primary: #c49b6c;
+  --lv-primary-dark: #a67f52;
+  --lv-secondary: #e8e4de;
+  --lv-tertiary: #2d2926;
+  --lv-neutral: #f8f6f2;
+  --lv-cream: #f5f2e9;
+  --lv-surface: #faf8f4;
+  --lv-border: #d9d2c8;
+  --lv-text: #2d2926;
+  --lv-text-muted: #6b6560;
+  --lv-success: #3d7a4a;
+  --lv-dot-grid: #2d2926;
+
+  --font-headline: 'Space Mono', ui-monospace, monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+}

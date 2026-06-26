@@ -1,0 +1,17 @@
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment & secrets
+.env
+.env.*
+
+# OS & editor
+.DS_Store
+.idea
+
+# Separate clones (maintained elsewhere)
+linkup_mcp/
+decentralized-will-management/
