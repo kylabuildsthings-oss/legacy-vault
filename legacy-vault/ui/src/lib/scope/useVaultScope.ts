@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import type { UserRole } from '@/lib/auth'
+import { useReleaseWorkflow } from '@/context/ReleaseWorkflowContext'
 import {
   MOCK_ADMIN_CLIENTS,
   MOCK_LEDGER,
@@ -7,14 +8,35 @@ import {
   MOCK_VAULTS,
   formatAum,
 } from '@/lib/mock/fixtures'
-import type { VaultScopeResult } from '@/lib/mock/types'
+import {
+  buildReleaseLedgerEntries,
+  buildReleaseSecurityEvents,
+  getEffectiveReleaseStatus,
+} from '@/lib/mock/releaseWorkflow'
+import type { ReleaseStatus, VaultRecord, VaultScopeResult } from '@/lib/mock/types'
 import { redactVault, vaultVisibleToRole } from '@/lib/scope/redactVault'
 
-export function getVaultScope(role: UserRole, partyId: string): VaultScopeResult {
-  const visibleVaults = MOCK_VAULTS.filter((v) =>
-    vaultVisibleToRole(v, role, partyId),
+function scopeVault<T extends VaultRecord>(
+  vault: T,
+  role: UserRole,
+  partyId: string,
+  releaseStatus: ReleaseStatus,
+) {
+  return {
+    ...redactVault(vault, role, partyId),
+    releaseStatus,
+  }
+}
+
+export function getVaultScope(
+  role: UserRole,
+  partyId: string,
+  overrides: Record<string, ReleaseStatus> = {},
+): VaultScopeResult {
+  const visibleVaults = MOCK_VAULTS.filter((v) => vaultVisibleToRole(v, role, partyId))
+  const scopedVaults = visibleVaults.map((v) =>
+    scopeVault(v, role, partyId, getEffectiveReleaseStatus(v, overrides)),
   )
-  const scopedVaults = visibleVaults.map((v) => redactVault(v, role, partyId))
 
   const totalNumeric =
     role === 'hnwi'
@@ -23,17 +45,28 @@ export function getVaultScope(role: UserRole, partyId: string): VaultScopeResult
         ? MOCK_VAULTS.reduce((sum, v) => sum + v.totalValueNumeric, 0)
         : 0
 
-  const pendingReleases = scopedVaults.filter((v) => v.status === 'pending').length
+  const pendingReleases = scopedVaults.filter(
+    (v) => v.releaseStatus === 'pending_verification',
+  ).length
 
-  const ledgerEntries = MOCK_LEDGER.filter((e) => {
+  let ledgerEntries = MOCK_LEDGER.filter((e) => {
     if (role === 'admin') return true
     return e.viewerIds.includes(partyId)
   })
 
-  const securityEvents = MOCK_SECURITY.filter((e) => {
+  let securityEvents = MOCK_SECURITY.filter((e) => {
     if (role === 'admin') return true
     return e.viewerIds.includes(partyId)
   })
+
+  for (const vault of visibleVaults) {
+    const releaseStatus = getEffectiveReleaseStatus(vault, overrides)
+    ledgerEntries = [...buildReleaseLedgerEntries(vault.id, vault.name, releaseStatus), ...ledgerEntries]
+    securityEvents = [
+      ...buildReleaseSecurityEvents(vault.id, vault.name, releaseStatus),
+      ...securityEvents,
+    ]
+  }
 
   return {
     role,
@@ -67,13 +100,32 @@ export function getVaultScope(role: UserRole, partyId: string): VaultScopeResult
 }
 
 export function useVaultScope(role: UserRole, partyId: string): VaultScopeResult {
-  return useMemo(() => getVaultScope(role, partyId), [role, partyId])
+  const { getReleaseStatus, releaseVersion } = useReleaseWorkflow()
+  return useMemo(
+    () => {
+      const overrides: Record<string, ReleaseStatus> = {}
+      for (const vault of MOCK_VAULTS) {
+        overrides[vault.id] = getReleaseStatus(vault)
+      }
+      return getVaultScope(role, partyId, overrides)
+    },
+    [role, partyId, getReleaseStatus, releaseVersion],
+  )
 }
 
 export function getAdminClients() {
   return MOCK_ADMIN_CLIENTS
 }
 
-export function getAdminVaults() {
-  return MOCK_VAULTS
+export function getAdminVaults(overrides: Record<string, ReleaseStatus> = {}) {
+  return MOCK_VAULTS.map((v) => ({
+    ...v,
+    releaseStatus: getEffectiveReleaseStatus(v, overrides),
+  }))
+}
+
+export function countPendingReleaseVaults(overrides: Record<string, ReleaseStatus> = {}) {
+  return MOCK_VAULTS.filter(
+    (v) => getEffectiveReleaseStatus(v, overrides) === 'pending_verification',
+  ).length
 }

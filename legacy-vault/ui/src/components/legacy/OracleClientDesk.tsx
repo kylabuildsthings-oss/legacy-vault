@@ -18,7 +18,7 @@ export function OracleClientDesk({ vaults }: OracleClientDeskProps) {
     testatorName: group.testatorName,
     vaults: group.vaults,
     jurisdictions: jurisdictionsLabel(group.vaults),
-    hasPending: group.vaults.some((v) => v.status === 'pending'),
+    hasPending: group.vaults.some((v) => v.releaseStatus === 'pending_verification'),
   }))
 
   return (
@@ -71,7 +71,9 @@ export function OracleClientDesk({ vaults }: OracleClientDeskProps) {
                   to={`/vaults/${vault.id}`}
                   className="font-headline text-[0.65rem] tracking-wider text-primary underline"
                 >
-                  Review {vault.name} →
+                  {vault.releaseStatus === 'pending_verification'
+                    ? `Confirm release — ${vault.name} →`
+                    : `Review ${vault.name} →`}
                 </Link>
               ))}
             </div>

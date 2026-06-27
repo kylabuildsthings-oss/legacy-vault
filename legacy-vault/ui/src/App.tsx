@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { ReleaseWorkflowProvider } from '@/context/ReleaseWorkflowContext'
 import { RoleGuard } from '@/components/layout/RoleGuard'
 import { ClientShell } from '@/components/layout/ClientShell'
 import { AdminShell } from '@/components/layout/AdminShell'
@@ -76,7 +77,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <ReleaseWorkflowProvider>
+        <AppRoutes />
+      </ReleaseWorkflowProvider>
     </AuthProvider>
   )
 }

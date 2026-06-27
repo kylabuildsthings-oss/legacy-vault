@@ -15,6 +15,8 @@
 
 ## Optional (linkup_mcp — Step 7)
 
+Local Cursor MCP + RAG for document Q&A while building Legacy Vault. **Not required to run the UI.** See [LINKUP_MCP.md](./LINKUP_MCP.md) for what was kept vs removed locally.
+
 - **uv** — Python package manager: https://github.com/astral-sh/uv
 - **Ollama** + `llama3.2` — local RAG for Cursor MCP
 - **Linkup API key** — optional web search in MCP

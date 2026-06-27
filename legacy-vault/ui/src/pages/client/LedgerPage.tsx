@@ -21,6 +21,7 @@ const LEDGER_TABS = [
   { id: 'all', label: 'All Activity' },
   { id: 'vault', label: 'Vault Updates' },
   { id: 'transfer', label: 'Asset Transfers' },
+  { id: 'settlements', label: 'Settlements' },
   { id: 'security', label: 'Security Events' },
 ]
 
@@ -42,6 +43,10 @@ export function LedgerPage() {
       )
     } else if (tab === 'transfer') {
       rows = rows.filter((r) => r.action.includes('Revaluation'))
+    } else if (tab === 'settlements') {
+      rows = rows.filter((r) =>
+        /release|settlement|payout|beneficiary/i.test(r.action),
+      )
     }
     if (search.trim()) {
       const q = search.toLowerCase()

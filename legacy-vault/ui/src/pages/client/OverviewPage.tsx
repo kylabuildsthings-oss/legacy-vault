@@ -2,7 +2,9 @@ import { Building2, Clock, Landmark } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { StatCard } from '@/components/legacy/StatCard'
+import { BeneficiaryPayoutCard } from '@/components/legacy/BeneficiaryPayoutCard'
 import { OracleClientDesk } from '@/components/legacy/OracleClientDesk'
+import { TokenizedHoldingsTable } from '@/components/legacy/TokenizedHoldingsTable'
 import { VaultCard } from '@/components/legacy/VaultCard'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -15,6 +17,7 @@ import {
   vaultValueCaption,
   vaultValueLine,
 } from '@/lib/scope/vaultDisplay'
+import { flattenTokenizedHoldings } from '@/lib/mock/tokenizedAssets'
 
 export function OverviewPage() {
   const { user } = useAuth()
@@ -32,7 +35,7 @@ export function OverviewPage() {
           <p className="mt-2 max-w-xl text-muted-foreground">
             {user.role === 'hnwi' && (
               <>
-                Welcome back, {firstName}. Your archival assets are secured across{' '}
+                Welcome back, {firstName}. Your tokenized real-world assets are secured across{' '}
                 {scope.vaults.length} global jurisdictions. System status: Optimal.
               </>
             )}
@@ -81,8 +84,28 @@ export function OverviewPage() {
         </div>
       )}
 
+      {user.role === 'hnwi' && scope.vaults.length > 0 && (
+        <section className="space-y-3">
+          <div>
+            <h2 className="font-headline text-sm tracking-widest uppercase">
+              Tokenized Holdings
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Real-world assets registered on Canton — token IDs synced across vaults.
+            </p>
+          </div>
+          <TokenizedHoldingsTable rows={flattenTokenizedHoldings(scope.vaults)} />
+        </section>
+      )}
+
       {user.role === 'heir' && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <>
+          {scope.vaults
+            .filter((v) => v.releaseStatus === 'release_triggered')
+            .map((vault) => (
+              <BeneficiaryPayoutCard key={vault.id} vault={vault} heirId={user.id} />
+            ))}
+          <div className="grid gap-4 md:grid-cols-3">
           <StatCard
             label="Your Allocation"
             value={scope.stats.totalAssetsLabel}
@@ -101,7 +124,8 @@ export function OverviewPage() {
             sublabel="Awaiting oracle trigger"
             icon={Clock}
           />
-        </div>
+          </div>
+        </>
       )}
 
       {user.role === 'oracle' && (

@@ -1,17 +1,23 @@
 import { useParams, Link } from 'react-router-dom'
-import { MoreVertical, Shield } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useReleaseWorkflow } from '@/context/ReleaseWorkflowContext'
 import { VisibilityArchitecture } from '@/components/legacy/VisibilityArchitecture'
+import { AssetAllocationTable } from '@/components/legacy/AssetAllocationTable'
+import { BeneficiaryPayoutCard } from '@/components/legacy/BeneficiaryPayoutCard'
+import { LastVerifiedTimestampCard } from '@/components/legacy/LastVerifiedTimestampCard'
+import { ReleaseConfirmBanner } from '@/components/legacy/ReleaseConfirmBanner'
 import { StatusBadge } from '@/components/legacy/StatusBadge'
-import { DataTable } from '@/components/legacy/DataTable'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MOCK_VAULTS } from '@/lib/mock/fixtures'
+import { countTokenizedHoldings } from '@/lib/mock/tokenizedAssets'
 import { redactVault, vaultVisibleToRole } from '@/lib/scope/redactVault'
 
 export function VaultDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const { getReleaseStatus, confirmRelease } = useReleaseWorkflow()
   if (!user || !id) return null
 
   const raw = MOCK_VAULTS.find((v) => v.id === id)
@@ -26,7 +32,8 @@ export function VaultDetailPage() {
     )
   }
 
-  const vault = redactVault(raw, user.role, user.id)
+  const releaseStatus = getReleaseStatus(raw)
+  const vault = { ...redactVault(raw, user.role, user.id), releaseStatus }
 
   return (
     <div className="space-y-8">
@@ -38,6 +45,12 @@ export function VaultDetailPage() {
           </div>
           <h1 className="font-headline text-4xl font-bold tracking-tight">{vault.name}</h1>
           <p className="text-sm text-muted-foreground">{vault.jurisdiction}</p>
+          {user.role === 'hnwi' && vault.visibleAssets.length > 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {countTokenizedHoldings([vault])} tokenized holding
+              {countTokenizedHoldings([vault]) !== 1 ? 's' : ''} · Canton registry
+            </p>
+          )}
           {user.role === 'heir' && (
             <p className="mt-2 text-sm text-muted-foreground">
               Testator: <span className="font-medium text-foreground">{vault.testatorName}</span>
@@ -70,6 +83,20 @@ export function VaultDetailPage() {
         )}
       </div>
 
+      {user.role === 'oracle' && (
+        <ReleaseConfirmBanner
+          vaultId={vault.id}
+          vaultName={vault.name}
+          testatorName={vault.testatorName}
+          releaseStatus={releaseStatus}
+          onConfirm={() => confirmRelease(vault.id)}
+        />
+      )}
+
+      {user.role === 'heir' && (
+        <BeneficiaryPayoutCard vault={vault} heirId={user.id} />
+      )}
+
       <VisibilityArchitecture vault={vault} role={user.role} />
 
       <section className="space-y-3">
@@ -83,35 +110,9 @@ export function VaultDetailPage() {
         </div>
 
         {vault.visibleAssets.length > 0 ? (
-          <DataTable
-            columns={[
-              {
-                key: 'name',
-                header: 'Asset Name',
-                render: (r) => (
-                  <span>
-                    {r.name}{' '}
-                    <span className="text-muted-foreground">(ID: {r.id})</span>
-                  </span>
-                ),
-              },
-              { key: 'heir', header: 'Intended Heir', render: (r) => r.intendedHeirLabel },
-              {
-                key: 'status',
-                header: 'Status',
-                render: (r) => <StatusBadge status={r.status} />,
-              },
-              {
-                key: 'actions',
-                header: 'Actions',
-                render: () => (
-                  <button type="button" className="text-muted-foreground" aria-label="Actions">
-                    <MoreVertical className="size-4" />
-                  </button>
-                ),
-              },
-            ]}
+          <AssetAllocationTable
             rows={vault.visibleAssets.map((a) => ({ ...a, id: a.id }))}
+            showTokenColumns={user.role !== 'oracle'}
           />
         ) : (
           <p className="rounded border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
@@ -136,17 +137,7 @@ export function VaultDetailPage() {
             conditions are met.
           </CardContent>
         </Card>
-        <Card className="rounded-sm shadow-none">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-headline text-xs tracking-wider uppercase">
-              Last Verified Timestamp
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 font-headline text-sm">
-            <p>OCT 24, 2024 — 14:32:01 UTC</p>
-            <p className="text-xs text-muted-foreground">HASH: 0x82f...a1c9</p>
-          </CardContent>
-        </Card>
+        <LastVerifiedTimestampCard />
       </div>
 
       <Link to="/vaults" className="inline-block text-sm text-primary underline">

@@ -5,6 +5,7 @@ import { ArchivalAssistant } from '@/components/legacy/ArchivalAssistant'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { TOKENIZED_ASSETS } from '@/lib/mock/tokenizedAssets'
 import {
   Select,
   SelectContent,
@@ -18,11 +19,6 @@ interface HeirDraft {
   id: string
   name: string
 }
-
-const TOKENIZED_ASSETS = [
-  { id: 'NFT-7721', label: 'Primary Residence (NYC)', type: 'NFT' },
-  { id: 'TKN-9004', label: 'Family Trust Funds', type: 'TKN' },
-]
 
 export function VaultWizardPage() {
   const [vaultName, setVaultName] = useState('My Will')
@@ -96,31 +92,33 @@ export function VaultWizardPage() {
             </ul>
           </div>
 
-          <div className="space-y-2">
-            <Label className="font-headline text-[0.65rem] tracking-widest uppercase">
-              Oracle Party ID
-            </Label>
-            <Input
-              value={oracleId}
-              onChange={(e) => setOracleId(e.target.value)}
-              placeholder="ORC-992-XXXX"
-            />
-          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="font-headline text-[0.65rem] tracking-widest uppercase">
+                Oracle Party ID
+              </Label>
+              <Input
+                value={oracleId}
+                onChange={(e) => setOracleId(e.target.value)}
+                placeholder="ORC-992-XXXX"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label className="font-headline text-[0.65rem] tracking-widest uppercase">
-              Check-in Interval
-            </Label>
-            <Select value={checkIn} onValueChange={(v) => v && setCheckIn(v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 Days</SelectItem>
-                <SelectItem value="30">30 Days</SelectItem>
-                <SelectItem value="90">90 Days</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label className="font-headline text-[0.65rem] tracking-widest uppercase">
+                Check-in Interval
+              </Label>
+              <Select value={checkIn} onValueChange={(v) => v && setCheckIn(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 Days</SelectItem>
+                  <SelectItem value="30">30 Days</SelectItem>
+                  <SelectItem value="90">90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -134,7 +132,9 @@ export function VaultWizardPage() {
                   className="flex items-center justify-between rounded border border-border bg-card px-3 py-2 text-sm"
                 >
                   <span>{asset.label}</span>
-                  <span className="font-headline text-xs text-muted-foreground">{asset.id}</span>
+                  <span className="font-headline text-xs text-muted-foreground">
+                    {asset.id} · {asset.type}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -166,9 +166,13 @@ export function VaultWizardPage() {
                     <td className="px-4 py-2">Heirs</td>
                     <td className="px-4 py-2">VIEW ONLY ✓</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-border">
                     <td className="px-4 py-2">Oracle</td>
                     <td className="px-4 py-2">TRIGGER ONLY ✓</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2">Token registry</td>
+                    <td className="px-4 py-2 text-[var(--lv-success)]">CANTON-SYNCED ✓</td>
                   </tr>
                 </tbody>
               </table>
@@ -188,7 +192,7 @@ export function VaultWizardPage() {
           </div>
         </div>
 
-        <ArchivalAssistant />
+        <ArchivalAssistant vaultName={vaultName} />
       </div>
     </div>
   )

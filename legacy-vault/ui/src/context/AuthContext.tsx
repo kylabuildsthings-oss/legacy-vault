@@ -14,6 +14,7 @@ import {
   saveSession,
   type SessionUser,
 } from '@/lib/auth'
+import { clearReleaseOverrides } from '@/lib/mock/releaseWorkflow'
 
 interface AuthContextValue {
   user: SessionUser | null
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearSession()
+    clearReleaseOverrides()
     setUser(null)
   }, [])
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Fingerprint, FileText, UserPlus, RefreshCw, Shield, Key } from 'lucide-react'
+import { Fingerprint, FileText, UserPlus, RefreshCw, Shield, Key, Landmark } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { DataTable } from '@/components/legacy/DataTable'
 import { StatusBadge } from '@/components/legacy/StatusBadge'
@@ -20,6 +20,8 @@ const eventIcons: Record<string, typeof Fingerprint> = {
   'Asset Revaluation': RefreshCw,
   'Heir Added': UserPlus,
   'Oracle Check-in': Shield,
+  'Release Trigger Confirmed': Shield,
+  'Atomic Settlement Queued': Landmark,
 }
 
 export function SecurityPage() {

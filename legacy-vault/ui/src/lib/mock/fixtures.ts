@@ -17,6 +17,7 @@ export const MOCK_VAULTS: VaultRecord[] = [
     testatorId: 'sarah.m',
     testatorName: 'Sarah Mitchell',
     oracleId: 'oracle@lawfirm',
+    releaseStatus: 'pending_verification',
     heirs: [
       { id: 'alex.h', name: 'Alex Henderson', allocationLabel: 'Primary heir — 60%' },
       { id: 'heir.maya', name: 'Maya Mitchell', allocationLabel: 'Secondary heir — 40%' },
@@ -25,6 +26,9 @@ export const MOCK_VAULTS: VaultRecord[] = [
       {
         id: 'AST-7112',
         name: 'Family Home (NYC)',
+        tokenId: 'NFT-7721',
+        assetClass: 'NFT',
+        settlementStatus: 'registered',
         intendedHeirId: 'alex.h',
         intendedHeirLabel: 'Alex Henderson',
         status: 'active',
@@ -32,6 +36,9 @@ export const MOCK_VAULTS: VaultRecord[] = [
       {
         id: 'AST-3349',
         name: 'Investment Portfolio',
+        tokenId: 'TKN-9004',
+        assetClass: 'RWA',
+        settlementStatus: 'pending_release',
         intendedHeirId: 'heir.maya',
         intendedHeirLabel: 'Maya Mitchell',
         status: 'active',
@@ -57,6 +64,9 @@ export const MOCK_VAULTS: VaultRecord[] = [
       {
         id: 'AST-9001',
         name: 'Family Trust Funds',
+        tokenId: 'TKN-9004',
+        assetClass: 'RWA',
+        settlementStatus: 'registered',
         intendedHeirId: 'alex.h',
         intendedHeirLabel: 'Alex Henderson',
         status: 'archived',
@@ -81,6 +91,9 @@ export const MOCK_VAULTS: VaultRecord[] = [
       {
         id: 'AST-5520',
         name: 'Global Equity Holdings',
+        tokenId: 'TKN-4410',
+        assetClass: 'Security',
+        settlementStatus: 'registered',
         intendedHeirId: 'heir.maya',
         intendedHeirLabel: 'Maya Mitchell',
         status: 'active',

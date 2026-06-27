@@ -36,7 +36,7 @@ Open http://localhost:5173 — Legacy Vault login screen.
 | 5 | **Done** | Client screens (Stitch layouts) — see [STEP5_COMPLETE.md](docs/legacy-vault/STEP5_COMPLETE.md) |
 | 6 | **Done** | Admin drill-down (client + vault detail) — see [STEP6_ADMIN_COMPLETE.md](docs/legacy-vault/STEP6_ADMIN_COMPLETE.md) |
 | 6 polish | Later | Registry filters, SOC threat map, bulk actions |
-| 7 | Pending | linkup_mcp corpus + RAG help |
+| 7 | Pending | linkup_mcp corpus + RAG help — see [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
 
 ## Prerequisites
 

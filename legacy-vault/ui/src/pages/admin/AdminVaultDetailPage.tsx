@@ -1,16 +1,20 @@
 import { Link, useParams } from 'react-router-dom'
-import { MoreVertical, Shield } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useReleaseWorkflow } from '@/context/ReleaseWorkflowContext'
 import { VisibilityArchitecture } from '@/components/legacy/VisibilityArchitecture'
+import { AssetAllocationTable } from '@/components/legacy/AssetAllocationTable'
+import { LastVerifiedTimestampCard } from '@/components/legacy/LastVerifiedTimestampCard'
 import { StatusBadge } from '@/components/legacy/StatusBadge'
-import { DataTable } from '@/components/legacy/DataTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MOCK_VAULTS } from '@/lib/mock/fixtures'
+import { countTokenizedHoldings } from '@/lib/mock/tokenizedAssets'
 import { redactVault, vaultVisibleToRole } from '@/lib/scope/redactVault'
 
 export function AdminVaultDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const { getReleaseStatus } = useReleaseWorkflow()
   if (!user || !id) return null
 
   const raw = MOCK_VAULTS.find((v) => v.id === id)
@@ -25,7 +29,10 @@ export function AdminVaultDetailPage() {
     )
   }
 
-  const vault = redactVault(raw, 'admin', user.id)
+  const vault = {
+    ...redactVault(raw, 'admin', user.id),
+    releaseStatus: getReleaseStatus(raw),
+  }
   const backTo = `/admin/clients/${vault.testatorId}`
 
   return (
@@ -52,6 +59,12 @@ export function AdminVaultDetailPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Institutional oversight — read-only administrative view.
           </p>
+          {vault.visibleAssets.length > 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {countTokenizedHoldings([vault])} tokenized holding
+              {countTokenizedHoldings([vault]) !== 1 ? 's' : ''} · Canton registry
+            </p>
+          )}
         </div>
       </div>
 
@@ -61,36 +74,7 @@ export function AdminVaultDetailPage() {
         <h2 className="font-headline text-sm tracking-widest uppercase">Asset Allocation</h2>
 
         {vault.visibleAssets.length > 0 ? (
-          <DataTable
-            columns={[
-              {
-                key: 'name',
-                header: 'Asset Name',
-                render: (r) => (
-                  <span>
-                    {r.name}{' '}
-                    <span className="text-muted-foreground">(ID: {r.id})</span>
-                  </span>
-                ),
-              },
-              { key: 'heir', header: 'Intended Heir', render: (r) => r.intendedHeirLabel },
-              {
-                key: 'status',
-                header: 'Status',
-                render: (r) => <StatusBadge status={r.status} />,
-              },
-              {
-                key: 'actions',
-                header: 'Actions',
-                render: () => (
-                  <button type="button" className="text-muted-foreground" aria-label="Actions">
-                    <MoreVertical className="size-4" />
-                  </button>
-                ),
-              },
-            ]}
-            rows={vault.visibleAssets.map((a) => ({ ...a, id: a.id }))}
-          />
+          <AssetAllocationTable rows={vault.visibleAssets.map((a) => ({ ...a, id: a.id }))} />
         ) : (
           <p className="rounded border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             No assets registered for this vault.
@@ -112,17 +96,7 @@ export function AdminVaultDetailPage() {
             conditions are met. Trust administrators have institutional read access for oversight.
           </CardContent>
         </Card>
-        <Card className="rounded-sm shadow-none">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-headline text-xs tracking-wider uppercase">
-              Last Verified Timestamp
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 font-headline text-sm">
-            <p>OCT 24, 2024 — 14:32:01 UTC</p>
-            <p className="text-xs text-muted-foreground">HASH: 0x82f...a1c9</p>
-          </CardContent>
-        </Card>
+        <LastVerifiedTimestampCard />
       </div>
 
       <div className="flex gap-4 text-sm">

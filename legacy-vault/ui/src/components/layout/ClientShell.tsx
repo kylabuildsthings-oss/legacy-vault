@@ -94,6 +94,9 @@ export function ClientShell() {
           <Lock className="size-3" />
           Encrypted session verified via decentralized ledger
         </span>
+        <span className="font-headline text-[0.6rem] tracking-widest uppercase italic">
+          Secured by Private Ledger
+        </span>
         <span>© 2024 Legacy Vault Institutional Archives</span>
       </footer>
     </div>

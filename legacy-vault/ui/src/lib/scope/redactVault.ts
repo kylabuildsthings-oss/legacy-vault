@@ -6,6 +6,8 @@ export function redactVault(
   role: UserRole,
   partyId: string,
 ): ScopedVault {
+  const releaseStatus = vault.releaseStatus ?? 'idle'
+
   if (role === 'hnwi' || role === 'admin') {
     return {
       ...vault,
@@ -13,6 +15,7 @@ export function redactVault(
       visibleAssets: vault.assets,
       visibleHeirs: vault.heirs,
       redactedHeirCount: 0,
+      releaseStatus,
     }
   }
 
@@ -26,6 +29,7 @@ export function redactVault(
       visibleAssets: ownAssets,
       visibleHeirs: ownHeir ? [ownHeir] : [],
       redactedHeirCount: Math.max(0, vault.heirs.length - (ownHeir ? 1 : 0)),
+      releaseStatus,
     }
   }
 
@@ -37,6 +41,7 @@ export function redactVault(
     visibleAssets: [],
     visibleHeirs: [],
     redactedHeirCount: vault.heirs.length,
+    releaseStatus,
   }
 }
 

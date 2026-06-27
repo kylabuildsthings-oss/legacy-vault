@@ -1,9 +1,16 @@
 import type { VaultStatus } from '@/components/legacy/StatusBadge'
 import type { UserRole } from '@/lib/auth'
 
+export type AssetClass = 'RWA' | 'NFT' | 'Security'
+
+export type SettlementStatus = 'registered' | 'pending_release' | 'settled'
+
 export interface VaultAsset {
   id: string
   name: string
+  tokenId: string
+  assetClass: AssetClass
+  settlementStatus: SettlementStatus
   intendedHeirId: string
   intendedHeirLabel: string
   status: VaultStatus
@@ -14,6 +21,8 @@ export interface VaultHeir {
   name: string
   allocationLabel: string
 }
+
+export type ReleaseStatus = 'idle' | 'pending_verification' | 'release_triggered'
 
 export interface VaultRecord {
   id: string
@@ -26,6 +35,7 @@ export interface VaultRecord {
   testatorId: string
   testatorName: string
   oracleId: string
+  releaseStatus?: ReleaseStatus
   heirs: VaultHeir[]
   assets: VaultAsset[]
 }
@@ -35,6 +45,7 @@ export interface ScopedVault extends VaultRecord {
   visibleAssets: VaultAsset[]
   visibleHeirs: VaultHeir[]
   redactedHeirCount: number
+  releaseStatus: ReleaseStatus
 }
 
 export interface LedgerEntry {
