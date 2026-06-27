@@ -118,7 +118,7 @@ LEGACYVAULT/
 |------|--------|
 | UI (Steps 1, 3–6) + hackathon tracks UI | Done |
 | Hackathon demo doc | Done — [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md) |
-| Daml (Step 2) | Deferred |
+| Daml (Step 2) | Deferred — [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) |
 | linkup_mcp RAG (Step 7) | Optional / pending |
 
 Step completion details: [STEP1_COMPLETE.md](docs/legacy-vault/STEP1_COMPLETE.md) · [STEP4_COMPLETE.md](docs/legacy-vault/STEP4_COMPLETE.md) · [STEP5_COMPLETE.md](docs/legacy-vault/STEP5_COMPLETE.md) · [STEP6_ADMIN_COMPLETE.md](docs/legacy-vault/STEP6_ADMIN_COMPLETE.md)
@@ -136,6 +136,8 @@ Role visibility matrix: [ROLE_VISIBILITY_MATRIX.md](docs/legacy-vault/ROLE_VISIB
 | uv + Ollama | Step 7 MCP RAG | Optional |
 
 Details: [docs/legacy-vault/PREREQUISITES.md](docs/legacy-vault/PREREQUISITES.md)
+
+**Daml backend (teammate):** [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · run `./scripts/setup-daml.sh`
 
 ### Full stack (after Step 2)
 

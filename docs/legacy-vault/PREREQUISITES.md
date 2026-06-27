@@ -7,11 +7,24 @@
 
 ## Required for Step 2 (Daml ledger)
 
-- **Daml SDK** — install via https://docs.daml.com/getting-started/index.html
+See **[DAML_SETUP.md](./DAML_SETUP.md)** for the full backend onboarding guide (JDK, Daml SDK, smoke test, contract layout).
+
+Quick check:
+
+```bash
+./scripts/setup-daml.sh
+```
+
+- **Daml SDK** — install via https://docs.daml.com/getting-started/install.html
   ```bash
-  daml new legacy-vault-check --template create-daml-app  # verify install
+  curl -sSL https://get.daml.com/ | sh
+  daml version
   ```
-- **Java 11+** — Daml Sandbox and JSON API require a JRE
+- **Java 11+** — Daml Sandbox and JSON API require a **real JDK** (not the macOS `/usr/bin/java` stub)
+  ```bash
+  brew install --cask temurin@17
+  java -version
+  ```
 
 ## Optional (linkup_mcp — Step 7)
 
