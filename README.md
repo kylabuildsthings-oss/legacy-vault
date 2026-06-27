@@ -47,8 +47,10 @@ Four parties, one workflow:
 | Layer | Status |
 |-------|--------|
 | React UI + mock release workflow | **Built** |
-| Daml contracts on Canton | Roadmap |
-| Live RAG agent (Ollama / linkup_mcp) | Roadmap |
+| Daml setup docs + readiness scripts | **Built** — [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) |
+| Daml contracts on Canton | Roadmap (backend teammate) |
+| Cursor MCP + local RAG (linkup_mcp 7A) | **Local dev tooling** — see [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
+| Live RAG in Archival Assistant (7B) | Roadmap |
 | Deployed URL | Submission task |
 
 ---
@@ -109,7 +111,7 @@ LEGACYVAULT/
 ├── linkup_mcp/            # Cursor MCP + RAG (gitignored locally)
 ├── decentralized-will-management/  # UI reference only
 ├── docs/legacy-vault/     # Project docs
-└── scripts/               # dev-ui.sh, setup-shadcn.sh
+└── scripts/               # dev-ui.sh, setup-daml.sh, sync-rag-corpus.sh
 ```
 
 ### Project status
@@ -118,12 +120,33 @@ LEGACYVAULT/
 |------|--------|
 | UI (Steps 1, 3–6) + hackathon tracks UI | Done |
 | Hackathon demo doc | Done — [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md) |
-| Daml (Step 2) | Deferred — [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) |
-| linkup_mcp RAG (Step 7) | Optional / pending |
+| Daml backend onboarding | Done — [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · `./scripts/setup-daml.sh` |
+| Daml contracts (Step 2) | Pending — backend teammate |
+| linkup_mcp RAG (Step 7A) | Local setup — [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) · `./scripts/sync-rag-corpus.sh` |
+| In-app live RAG (Step 7B) | Roadmap |
 
 Step completion details: [STEP1_COMPLETE.md](docs/legacy-vault/STEP1_COMPLETE.md) · [STEP4_COMPLETE.md](docs/legacy-vault/STEP4_COMPLETE.md) · [STEP5_COMPLETE.md](docs/legacy-vault/STEP5_COMPLETE.md) · [STEP6_ADMIN_COMPLETE.md](docs/legacy-vault/STEP6_ADMIN_COMPLETE.md)
 
 Role visibility matrix: [ROLE_VISIBILITY_MATRIX.md](docs/legacy-vault/ROLE_VISIBILITY_MATRIX.md)
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `./scripts/dev-ui.sh` | Start React UI at http://localhost:5173 |
+| `./scripts/setup-daml.sh` | Check Java + Daml SDK readiness (backend) |
+| `./scripts/sync-rag-corpus.sh` | Copy vault docs into local `linkup_mcp/data/` for RAG |
+
+### Cursor MCP + RAG (optional, local only)
+
+The UI demo uses a **scripted** Archival Assistant. For document Q&A while building, set up **linkup_mcp** locally (gitignored — not in this repo):
+
+1. Clone or restore `linkup_mcp/` beside this project
+2. `ollama pull llama3.2` · `cd linkup_mcp && uv sync --python 3.12`
+3. `./scripts/sync-rag-corpus.sh`
+4. Configure `~/.cursor/mcp.json` — see [PREREQUISITES.md](docs/legacy-vault/PREREQUISITES.md)
+
+Full guide: [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md)
 
 ### Prerequisites
 
@@ -133,7 +156,7 @@ Role visibility matrix: [ROLE_VISIBILITY_MATRIX.md](docs/legacy-vault/ROLE_VISIB
 | npm | UI deps | Installed |
 | Daml SDK | Step 2 | Not installed yet |
 | Java 11+ | Daml runtime | Not installed yet |
-| uv + Ollama | Step 7 MCP RAG | Optional |
+| uv + Ollama + `llama3.2` | Step 7A MCP RAG (local) | Optional — see [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
 
 Details: [docs/legacy-vault/PREREQUISITES.md](docs/legacy-vault/PREREQUISITES.md)
 
