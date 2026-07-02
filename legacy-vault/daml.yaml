@@ -1,0 +1,14 @@
+sdk-version: 2.2.0
+name: legacy-vault
+version: 0.1.0
+source: daml
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script
+start-navigator: false
+codegen:
+  js:
+    output-directory: ui/src/generated/daml.js
+    npm-scope: daml.js
+init-script: Scripts.Setup:setup

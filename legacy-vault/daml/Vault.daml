@@ -1,0 +1,244 @@
+-- Legacy Vault smart contracts — see docs/legacy-vault/CONTRACT_SPEC.md
+module Vault where
+
+-- | Shared enumerations (mirror legacy-vault/ui/src/lib/mock/types.ts)
+data AssetClass = RWA | NFT | Security deriving (Eq, Show)
+
+data SettlementStatus = Registered | PendingRelease | Settled deriving (Eq, Show)
+
+data ReleaseStatus = Idle | PendingVerification | ReleaseTriggered deriving (Eq, Show)
+
+data VaultStatus = Active | Verified | Archived | Pending deriving (Eq, Show)
+
+-- | Full vault metadata — testator signatory; admin observer only.
+template VaultAgreement
+  with
+    vaultId : Text
+    name : Text
+    jurisdiction : Text
+    totalValueNumeric : Decimal
+    lastAccessed : Text
+    status : VaultStatus
+    testator : Party
+    oracle : Party
+    admin : Party
+  where
+    signatory testator
+    observer admin
+
+    choice AddHeir : ContractId HeirAllocation
+      with
+        heir : Party
+        allocationLabel : Text
+        assetIds : [Text]
+      controller testator
+      do
+        create HeirAllocation with
+          vaultId
+          vaultName = name
+          heir
+          allocationLabel
+          assetIds
+          testator
+          admin
+
+    choice RegisterAsset : ContractId TokenizedAsset
+      with
+        assetId : Text
+        assetName : Text
+        tokenId : Text
+        assetClass : AssetClass
+        settlementStatus : SettlementStatus
+        intendedHeir : Party
+        assetStatus : VaultStatus
+      controller testator
+      do
+        create TokenizedAsset with
+          assetId
+          vaultId
+          name = assetName
+          tokenId
+          assetClass
+          settlementStatus
+          intendedHeir
+          status = assetStatus
+          testator
+          admin
+
+    choice ArchiveVault : ContractId VaultAgreement
+      controller testator
+      do
+        archived <- create this with status = Archived
+        archive self
+        return archived
+
+-- | Tokenized RWA row (Track 2) — visible to intended heir + admin.
+template TokenizedAsset
+  with
+    assetId : Text
+    vaultId : Text
+    name : Text
+    tokenId : Text
+    assetClass : AssetClass
+    settlementStatus : SettlementStatus
+    intendedHeir : Party
+    status : VaultStatus
+    testator : Party
+    admin : Party
+  where
+    signatory testator
+    observer intendedHeir, admin
+
+-- | Heir-scoped allocation (Track 1 privacy).
+template HeirAllocation
+  with
+    vaultId : Text
+    vaultName : Text
+    heir : Party
+    allocationLabel : Text
+    assetIds : [Text]
+    testator : Party
+    admin : Party
+  where
+    signatory testator
+    observer heir, admin
+
+-- | Oracle release workflow (Track 3) — no asset/heir details.
+template OracleAssignment
+  with
+    vaultId : Text
+    vaultName : Text
+    testator : Party
+    oracle : Party
+    admin : Party
+    releaseStatus : ReleaseStatus
+  where
+    signatory testator
+    observer oracle, admin
+
+    choice InitiateVerification : ContractId OracleAssignment
+      controller testator
+      do
+        assertMsg "Release must be idle to initiate verification" (releaseStatus == Idle)
+        create this with releaseStatus = PendingVerification
+
+    choice ConfirmRelease : ConfirmReleaseResult
+      with
+        beneficiary : Party
+        beneficiaryLabel : Text
+      controller oracle
+      do
+        assertMsg "Release must be pending verification" (releaseStatus == PendingVerification)
+        settlementCid <-
+          create
+            SettlementRecord with
+              vaultId
+              vaultName
+              beneficiary
+              beneficiaryLabel
+              payoutStatus = "pending"
+              confirmedBy = oracle
+              testator
+              admin
+        releaseLedgerCid <-
+          create
+            LedgerEvent with
+              issuer = oracle
+              eventId = "led-release-" <> vaultId
+              vaultId
+              vaultName
+              action = "Release trigger confirmed — atomic settlement queued"
+              status = Verified
+              viewers = [testator, beneficiary, oracle, admin]
+        payoutLedgerCid <-
+          create
+            LedgerEvent with
+              issuer = oracle
+              eventId = "led-payout-" <> vaultId
+              vaultId
+              vaultName
+              action = "Beneficiary payout — " <> beneficiaryLabel <> " — pending"
+              status = Pending
+              viewers = [testator, beneficiary, admin]
+        releaseSecCid <-
+          create
+            SecurityEventRecord with
+              issuer = oracle
+              eventId = "sec-release-" <> vaultId
+              vaultId
+              eventType = "Release Trigger Confirmed"
+              targetAsset = vaultName
+              integrityStatus = "verified"
+              viewers = [oracle, testator, admin]
+        settlementSecCid <-
+          create
+            SecurityEventRecord with
+              issuer = oracle
+              eventId = "sec-settlement-" <> vaultId
+              vaultId
+              eventType = "Atomic Settlement Queued"
+              targetAsset = vaultName
+              integrityStatus = "verified"
+              viewers = [testator, beneficiary, oracle, admin]
+        updatedOracle <- create this with releaseStatus = ReleaseTriggered
+        return
+          ConfirmReleaseResult with
+            oracleAssignment = updatedOracle
+            settlement = settlementCid
+            releaseLedger = releaseLedgerCid
+            payoutLedger = payoutLedgerCid
+            releaseSecurity = releaseSecCid
+            settlementSecurity = settlementSecCid
+
+data ConfirmReleaseResult = ConfirmReleaseResult
+  with
+    oracleAssignment : ContractId OracleAssignment
+    settlement : ContractId SettlementRecord
+    releaseLedger : ContractId LedgerEvent
+    payoutLedger : ContractId LedgerEvent
+    releaseSecurity : ContractId SecurityEventRecord
+    settlementSecurity : ContractId SecurityEventRecord
+  deriving (Eq, Show)
+
+-- | Post-release beneficiary payout row.
+template SettlementRecord
+  with
+    vaultId : Text
+    vaultName : Text
+    beneficiary : Party
+    beneficiaryLabel : Text
+    payoutStatus : Text
+    confirmedBy : Party
+    testator : Party
+    admin : Party
+  where
+    signatory confirmedBy
+    observer beneficiary, testator, admin
+
+-- | Audit row for ledger tab.
+template LedgerEvent
+  with
+    issuer : Party
+    eventId : Text
+    vaultId : Text
+    vaultName : Text
+    action : Text
+    status : VaultStatus
+    viewers : [Party]
+  where
+    signatory issuer
+    observer viewers
+
+-- | Audit row for security tab.
+template SecurityEventRecord
+  with
+    issuer : Party
+    eventId : Text
+    vaultId : Text
+    eventType : Text
+    targetAsset : Text
+    integrityStatus : Text
+    viewers : [Party]
+  where
+    signatory issuer
+    observer viewers

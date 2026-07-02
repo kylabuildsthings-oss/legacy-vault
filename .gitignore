@@ -12,6 +12,13 @@ dist-ssr/
 .DS_Store
 .idea
 
+# Daml build artifacts & codegen
+legacy-vault/.daml/
+legacy-vault/ui/src/generated/
+
+# Canton sandbox runtime logs
+legacy-vault/log/
+
 # Separate clones (maintained elsewhere)
 linkup_mcp/
 decentralized-will-management/

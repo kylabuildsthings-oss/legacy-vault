@@ -58,7 +58,7 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
   function handleInitiateVerification() {
     if (verificationInitiated) return
 
-    setPendingVerification(DEMO_VAULT_ID)
+    void setPendingVerification(DEMO_VAULT_ID)
     setVerificationInitiated(true)
     appendMessage({
       id: nextMessageId(),

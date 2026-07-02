@@ -1,0 +1,113 @@
+-- Phase 4 — visibility and release workflow tests (CONTRACT_SPEC.md)
+module Scripts.Tests where
+
+import DA.List (head)
+import Daml.Script
+import Scripts.Fixtures
+import Vault
+
+testHeirVisibility : Script ()
+testHeirVisibility = script do
+  seed <- seedVlt001Pending
+  let Vlt001Parties {heirAlex, heirMaya, ..} = seed.parties
+
+  alexAllocs <- query @HeirAllocation heirAlex
+  assertMsg "Alex should see exactly one HeirAllocation" (length alexAllocs == 1)
+  let (_, alloc) = head alexAllocs
+  assertMsg "Alex allocation should be for Alex" (alloc.heir == heirAlex)
+  assertMsg "Alex allocation should reference AST-7112" (elem "AST-7112" alloc.assetIds)
+
+  alexAssets <- query @TokenizedAsset heirAlex
+  assertMsg "Alex should see exactly one TokenizedAsset" (length alexAssets == 1)
+  let (_, asset) = head alexAssets
+  assertMsg "Alex asset should be AST-7112" (asset.assetId == "AST-7112")
+
+  mayaAssets <- query @TokenizedAsset heirMaya
+  assertMsg "Maya should see exactly one TokenizedAsset" (length mayaAssets == 1)
+  let (_, mayaAsset) = head mayaAssets
+  assertMsg "Maya asset should be AST-3349" (mayaAsset.assetId == "AST-3349")
+
+  alexVaults <- query @VaultAgreement heirAlex
+  assertMsg "Heir must not observe full VaultAgreement" (null alexVaults)
+
+testOracleIsolation : Script ()
+testOracleIsolation = script do
+  seed <- seedVlt001Pending
+  let Vlt001Parties {oracle, testator, ..} = seed.parties
+
+  oracleAssignments <- query @OracleAssignment oracle
+  assertMsg "Oracle should see exactly one OracleAssignment" (length oracleAssignments == 1)
+  let (_, assignment) = head oracleAssignments
+  assertMsg "Oracle assignment should be VLT-001" (assignment.vaultId == "VLT-001")
+
+  oracleAssets <- query @TokenizedAsset oracle
+  assertMsg "Oracle must not observe TokenizedAsset contracts" (null oracleAssets)
+
+  oracleVaults <- query @VaultAgreement oracle
+  assertMsg "Oracle must not observe VaultAgreement" (null oracleVaults)
+
+  oracleAllocs <- query @HeirAllocation oracle
+  assertMsg "Oracle must not observe HeirAllocation" (null oracleAllocs)
+
+  testatorVaults <- query @VaultAgreement testator
+  assertMsg "Testator should observe VaultAgreement" (length testatorVaults == 1)
+
+testInitiateVerification : Script ()
+testInitiateVerification = script do
+  seed <- seedVlt001Idle
+  let Vlt001Parties {testator, oracle, ..} = seed.parties
+
+  _ <-
+    submit testator do
+      exerciseCmd seed.oracleAssignment InitiateVerification
+
+  oracleAssignments <- query @OracleAssignment oracle
+  assertMsg "Oracle should see assignment after initiate" (length oracleAssignments == 1)
+  let (_, assignment) = head oracleAssignments
+  assertMsg "Status should be PendingVerification after initiate"
+    (assignment.releaseStatus == PendingVerification)
+
+testConfirmRelease : Script ()
+testConfirmRelease = script do
+  seed <- seedVlt001Pending
+  let Vlt001Parties {oracle, heirAlex, ..} = seed.parties
+
+  _ <-
+    submit oracle do
+      exerciseCmd
+        seed.oracleAssignment
+        ConfirmRelease with
+          beneficiary = heirAlex
+          beneficiaryLabel = "Alex Henderson"
+
+  oracleAssignments <- query @OracleAssignment oracle
+  assertMsg "Oracle should see assignment after confirm" (length oracleAssignments == 1)
+  let (_, assignment) = head oracleAssignments
+  assertMsg "Status should be ReleaseTriggered after confirm"
+    (assignment.releaseStatus == ReleaseTriggered)
+
+  alexSettlements <- query @SettlementRecord heirAlex
+  assertMsg "Alex should observe SettlementRecord" (length alexSettlements == 1)
+  let (_, settlement) = head alexSettlements
+  assertMsg "Settlement should be for Alex" (settlement.beneficiary == heirAlex)
+  assertMsg "Settlement payout should be pending" (settlement.payoutStatus == "pending")
+
+  alexLedgers <- query @LedgerEvent heirAlex
+  assertMsg "Alex should observe ledger events after release" (length alexLedgers == 2)
+
+testAdminOversight : Script ()
+testAdminOversight = script do
+  seed <- seedVlt001Pending
+  let Vlt001Parties {admin, ..} = seed.parties
+
+  vaults <- query @VaultAgreement admin
+  assertMsg "Admin should see VaultAgreement" (length vaults == 1)
+
+  assets <- query @TokenizedAsset admin
+  assertMsg "Admin should see both TokenizedAssets" (length assets == 2)
+
+  allocs <- query @HeirAllocation admin
+  assertMsg "Admin should see both HeirAllocations" (length allocs == 2)
+
+  oracles <- query @OracleAssignment admin
+  assertMsg "Admin should see OracleAssignment" (length oracles == 1)

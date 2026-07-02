@@ -10,18 +10,30 @@ import { ReleaseConfirmBanner } from '@/components/legacy/ReleaseConfirmBanner'
 import { StatusBadge } from '@/components/legacy/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MOCK_VAULTS } from '@/lib/mock/fixtures'
 import { countTokenizedHoldings } from '@/lib/mock/tokenizedAssets'
-import { redactVault, vaultVisibleToRole } from '@/lib/scope/redactVault'
+import { useVaultScope } from '@/lib/scope/useVaultScope'
 
 export function VaultDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
-  const { getReleaseStatus, confirmRelease } = useReleaseWorkflow()
+  const { confirmRelease, workflowError } = useReleaseWorkflow()
+  const scope = useVaultScope(user?.role ?? 'hnwi', user?.id ?? '')
   if (!user || !id) return null
 
-  const raw = MOCK_VAULTS.find((v) => v.id === id)
-  if (!raw || !vaultVisibleToRole(raw, user.role, user.id)) {
+  if (scope.loading) {
+    return <p className="text-muted-foreground">Loading vault from ledger…</p>
+  }
+
+  if (scope.error) {
+    return (
+      <p className="text-destructive">
+        Ledger error: {scope.error}. Start ./scripts/dev-ledger.sh or set VITE_USE_MOCK_LEDGER=true.
+      </p>
+    )
+  }
+
+  const vault = scope.vaults.find((v) => v.id === id)
+  if (!vault) {
     return (
       <p className="text-muted-foreground">
         Vault not found or not visible for your role.{' '}
@@ -32,8 +44,7 @@ export function VaultDetailPage() {
     )
   }
 
-  const releaseStatus = getReleaseStatus(raw)
-  const vault = { ...redactVault(raw, user.role, user.id), releaseStatus }
+  const releaseStatus = vault.releaseStatus
 
   return (
     <div className="space-y-8">
@@ -84,13 +95,18 @@ export function VaultDetailPage() {
       </div>
 
       {user.role === 'oracle' && (
-        <ReleaseConfirmBanner
-          vaultId={vault.id}
-          vaultName={vault.name}
-          testatorName={vault.testatorName}
-          releaseStatus={releaseStatus}
-          onConfirm={() => confirmRelease(vault.id)}
-        />
+        <>
+          {workflowError && (
+            <p className="text-sm text-destructive">Release failed: {workflowError}</p>
+          )}
+          <ReleaseConfirmBanner
+            vaultId={vault.id}
+            vaultName={vault.name}
+            testatorName={vault.testatorName}
+            releaseStatus={releaseStatus}
+            onConfirm={() => void confirmRelease(vault.id)}
+          />
+        </>
       )}
 
       {user.role === 'heir' && (

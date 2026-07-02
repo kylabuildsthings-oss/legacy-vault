@@ -19,4 +19,4 @@
 
 SOC and ledger tables include a **Client** column (testator name) for cross-client disambiguation.
 
-See the build plan for route map and screen inventory.
+See [CONTRACT_SPEC.md](./CONTRACT_SPEC.md) for the demo cast mapped to Daml parties and [ROLE_VISIBILITY_MATRIX.md](./ROLE_VISIBILITY_MATRIX.md) for the UX matrix.

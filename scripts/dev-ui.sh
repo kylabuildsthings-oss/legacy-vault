@@ -7,10 +7,8 @@ UI="$ROOT/legacy-vault/ui"
 
 cd "$UI"
 
-if [[ ! -d node_modules ]]; then
-  echo "node_modules missing — running npm install..."
-  npm install
-fi
+echo "Ensuring UI dependencies are installed..."
+npm install
 
 echo "Starting dev server at http://localhost:5173"
 npm run dev

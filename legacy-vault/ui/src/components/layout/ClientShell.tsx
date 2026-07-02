@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { LedgerScopeBanner } from '@/components/layout/LedgerScopeBanner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -86,6 +87,7 @@ export function ClientShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
+        <LedgerScopeBanner />
         <Outlet />
       </main>
 

@@ -2,7 +2,7 @@
 
 Guide for the teammate implementing **Legacy Vault** smart contracts on **Daml** / **Canton Network**. The React UI runs standalone with mock data today; this doc gets you from zero to `daml start`.
 
-**Related docs:** [ROLE_VISIBILITY_MATRIX.md](./ROLE_VISIBILITY_MATRIX.md) · [PREREQUISITES.md](./PREREQUISITES.md) · [legacy-vault/daml/README.md](../../legacy-vault/daml/README.md)
+**Related docs:** [CONTRACT_SPEC.md](./CONTRACT_SPEC.md) · [ROLE_VISIBILITY_MATRIX.md](./ROLE_VISIBILITY_MATRIX.md) · [PREREQUISITES.md](./PREREQUISITES.md) · [legacy-vault/daml/README.md](../../legacy-vault/daml/README.md)
 
 ---
 
@@ -17,7 +17,7 @@ Daml contracts in [`legacy-vault/daml/`](../../legacy-vault/daml/) will encode *
 | Oracle | Law firm | Trigger / release; no asset details until release |
 | Trust administrator | Admin | Institutional oversight |
 
-Target templates (not written yet): `Vault.daml`, optional `VaultAdmin.daml`.
+Target templates: `Vault.daml` — see [CONTRACT_SPEC.md](./CONTRACT_SPEC.md) for full template, choice, and party design.
 
 The frontend will connect later via **JSON API** + generated **`daml.js`** — not wired in the repo yet.
 
@@ -31,11 +31,21 @@ The frontend will connect later via **JSON API** + generated **`daml.js`** — n
 | **Daml SDK** | Latest from [get.daml.com](https://get.daml.com/) | Build & run contracts |
 | **Node.js** | 18+ | UI (separate terminal) |
 
-Run the repo checker (after Step 8 lands):
+Run the repo checker:
 
 ```bash
 ./scripts/setup-daml.sh
 ```
+
+**Quick install (macOS Apple Silicon):**
+
+```bash
+./scripts/install-java.sh    # JDK 17 → ~/.jdk (no sudo)
+./scripts/install-daml.sh  # Daml SDK 2.2.0 → ~/.daml (resumable download)
+./scripts/setup-daml.sh    # verify both
+```
+
+If downloads fail on slow networks, re-run `./scripts/install-daml.sh` — it resumes from `~/.cache/legacy-vault/daml/`.
 
 ---
 
@@ -190,8 +200,8 @@ Open http://localhost:5173 — demo logins in [README.md](../../README.md) (`vau
 Not implemented yet. Typical path:
 
 1. `daml codegen js` (or project template output) → `ui/daml.js` or npm package
-2. Configure JSON API endpoint in UI env (e.g. `VITE_DAML_JSON_API`)
-3. Replace [`fixtures.ts`](../../legacy-vault/ui/src/lib/mock/fixtures.ts) reads with ledger queries per role party
+2. Configure JSON API endpoint in UI env (see [`UI_LEDGER_INTEGRATION.md`](UI_LEDGER_INTEGRATION.md))
+3. Set `VITE_USE_MOCK_LEDGER=false` in `legacy-vault/ui/.env.local` — [`useVaultScope`](../../legacy-vault/ui/src/lib/scope/useVaultScope.ts) queries the ledger per role
 4. Map session user IDs (`sarah.m`, etc.) to allocated **party IDs** on the sandbox
 
 Keep mock mode until party allocation and auth are defined.

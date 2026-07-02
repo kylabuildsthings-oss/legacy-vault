@@ -1,0 +1,119 @@
+-- Shared VLT-001 seed for init-script and tests — see CONTRACT_SPEC.md
+module Scripts.Fixtures where
+
+import Daml.Script
+import Vault
+
+data Vlt001Parties = Vlt001Parties with
+    testator : Party
+    heirAlex : Party
+    heirMaya : Party
+    oracle : Party
+    admin : Party
+
+data Vlt001Seed = Vlt001Seed with
+    parties : Vlt001Parties
+    vault : ContractId VaultAgreement
+    oracleAssignment : ContractId OracleAssignment
+
+allocateVlt001Parties : Script Vlt001Parties
+allocateVlt001Parties = do
+  testator <- allocateParty "Testator_Sarah"
+  heirAlex <- allocateParty "Heir_Alex"
+  heirMaya <- allocateParty "Heir_Maya"
+  oracle <- allocateParty "Oracle_Sterling"
+  admin <- allocateParty "Admin_Trust"
+  return
+    Vlt001Parties with
+      testator
+      heirAlex
+      heirMaya
+      oracle
+      admin
+
+seedVlt001WithRelease : ReleaseStatus -> Script Vlt001Seed
+seedVlt001WithRelease releaseStatus = do
+  parties@Vlt001Parties {..} <- allocateVlt001Parties
+
+  vaultCid <-
+    submit testator do
+      createCmd
+        VaultAgreement with
+          vaultId = "VLT-001"
+          name = "My Will"
+          jurisdiction = "Geneva, CH"
+          totalValueNumeric = 1240000000.0
+          lastAccessed = "2024-05-21"
+          status = Verified
+          testator
+          oracle
+          admin
+
+  oracleCid <-
+    submit testator do
+      createCmd
+        OracleAssignment with
+          vaultId = "VLT-001"
+          vaultName = "My Will"
+          testator
+          oracle
+          admin
+          releaseStatus
+
+  submit testator do
+    createCmd
+      HeirAllocation with
+        vaultId = "VLT-001"
+        vaultName = "My Will"
+        heir = heirAlex
+        allocationLabel = "Primary heir — 60%"
+        assetIds = ["AST-7112"]
+        testator
+        admin
+
+  submit testator do
+    createCmd
+      HeirAllocation with
+        vaultId = "VLT-001"
+        vaultName = "My Will"
+        heir = heirMaya
+        allocationLabel = "Secondary heir — 40%"
+        assetIds = ["AST-3349"]
+        testator
+        admin
+
+  submit testator do
+    createCmd
+      TokenizedAsset with
+        assetId = "AST-7112"
+        vaultId = "VLT-001"
+        name = "Family Home (NYC)"
+        tokenId = "NFT-7721"
+        assetClass = NFT
+        settlementStatus = Registered
+        intendedHeir = heirAlex
+        status = Active
+        testator
+        admin
+
+  submit testator do
+    createCmd
+      TokenizedAsset with
+        assetId = "AST-3349"
+        vaultId = "VLT-001"
+        name = "Investment Portfolio"
+        tokenId = "TKN-9004"
+        assetClass = RWA
+        settlementStatus = PendingRelease
+        intendedHeir = heirMaya
+        status = Active
+        testator
+        admin
+
+  return Vlt001Seed with parties, vault = vaultCid, oracleAssignment = oracleCid
+
+seedVlt001Pending : Script Vlt001Seed
+seedVlt001Pending = seedVlt001WithRelease PendingVerification
+
+seedVlt001Idle : Script Vlt001Seed
+seedVlt001Idle = seedVlt001WithRelease Idle

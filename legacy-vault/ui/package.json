@@ -11,8 +11,13 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@daml.js/legacy-vault-0.1.0": "file:src/generated/daml.js/legacy-vault-0.1.0",
+    "@daml/ledger": "2.2.0",
+    "@daml/types": "2.2.0",
     "@fontsource-variable/geist": "^5.2.9",
     "@tailwindcss/vite": "^4.3.1",
+    "events": "^3.3.0",
+    "lodash": "^4.18.1",
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

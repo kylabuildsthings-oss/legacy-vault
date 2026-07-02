@@ -1,0 +1,11 @@
+-- Seed VLT-001 demo data — see docs/legacy-vault/CONTRACT_SPEC.md
+module Scripts.Setup where
+
+import Daml.Script
+import Scripts.Fixtures
+
+setup : Script ()
+setup = do
+  seed <- seedVlt001Idle
+  debug ("Seeded VLT-001 — vault contract: " <> show seed.vault)
+  return ()

@@ -91,4 +91,8 @@ export interface VaultScopeResult {
   ledgerEntries: LedgerEntry[]
   securityEvents: SecurityEvent[]
   canCreateVault: boolean
+  loading?: boolean
+  error?: string | null
+  errorDetail?: string | null
+  ledgerConnected?: boolean
 }
