@@ -3,6 +3,7 @@ export interface AssistantMessage {
   role: 'assistant' | 'user'
   text: string
   action?: 'initiate_verification'
+  citations?: Array<{ label: string; source: string }>
 }
 
 export const ASSISTANT_OPENING_MESSAGES: AssistantMessage[] = [

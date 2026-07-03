@@ -1,3 +1,5 @@
+import { apiJson, clearApiToken, saveApiToken } from '@/lib/api/client'
+
 export type UserRole = 'hnwi' | 'heir' | 'oracle' | 'admin'
 
 export interface SessionUser {
@@ -27,10 +29,28 @@ const DEMO_USERS: Record<string, { password: string; user: SessionUser }> = {
 
 const SESSION_KEY = 'legacy-vault-session'
 
-export function authenticate(userId: string, password: string): SessionUser | null {
+export function authenticateLocalDemoUser(userId: string, password: string): SessionUser | null {
   const entry = DEMO_USERS[userId.trim().toLowerCase()]
   if (!entry || entry.password !== password) return null
   return entry.user
+}
+
+export async function authenticate(userId: string, password: string): Promise<SessionUser | null> {
+  try {
+    const body = await apiJson<{ result: { user: SessionUser; token: string } }>('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, password }),
+    })
+    saveApiToken(body.result.token)
+    return body.result.user
+  } catch {
+    // Keep mock-mode demos usable when the product backend is not running.
+    const localUser = authenticateLocalDemoUser(userId, password)
+    if (!localUser) return null
+    clearApiToken()
+    return localUser
+  }
 }
 
 export function saveSession(user: SessionUser): void {
@@ -49,6 +69,7 @@ export function loadSession(): SessionUser | null {
 
 export function clearSession(): void {
   localStorage.removeItem(SESSION_KEY)
+  clearApiToken()
 }
 
 export function homePathForRole(role: UserRole): string {

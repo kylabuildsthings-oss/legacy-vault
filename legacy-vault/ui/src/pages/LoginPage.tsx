@@ -11,19 +11,26 @@ export function LoginPage() {
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   if (user) {
     return <Navigate to={homePathForRole(user.role)} replace />
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const session = login(userId, password)
-    if (!session) {
-      setError('Invalid credentials. Try sarah.m / vault')
-      return
+    setSubmitting(true)
+    setError('')
+    try {
+      const session = await login(userId, password)
+      if (!session) {
+        setError('Invalid credentials. Try sarah.m / vault')
+        return
+      }
+      navigate(homePathForRole(session.role))
+    } finally {
+      setSubmitting(false)
     }
-    navigate(homePathForRole(session.role))
   }
 
   return (
@@ -72,8 +79,8 @@ export function LoginPage() {
 
           {error && <p className="login-error">{error}</p>}
 
-          <button type="submit" className="login-submit">
-            SIGN IN
+          <button type="submit" className="login-submit" disabled={submitting}>
+            {submitting ? 'SIGNING IN…' : 'SIGN IN'}
           </button>
         </form>
 

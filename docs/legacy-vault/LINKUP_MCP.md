@@ -4,7 +4,7 @@ The [`linkup_mcp/`](../../linkup_mcp/) folder is a **local-only** MCP + RAG serv
 
 ## What the UI uses today
 
-Nothing. `./scripts/dev-ui.sh` runs standalone mock data. The Archival Assistant sidebar is static placeholder copy until Step 7B.
+Nothing from linkup_mcp. The in-app **Archival Assistant** calls the Legacy Vault backend (`POST /assistant/query`) and uses role-scoped Canton vault context. See [ASSISTANT.md](ASSISTANT.md).
 
 ## What was kept (local slim copy)
 
@@ -20,14 +20,15 @@ Nothing. `./scripts/dev-ui.sh` runs standalone mock data. The Archival Assistant
 
 Stitch HTTP bridge, face verification, Google OAuth, Hermes/Nami seeds, ElevenLabs toolkit, voice hotkey tools, standalone side apps, and related docs/scripts. These deletions are **local only** — your teammate's upstream fork is unchanged.
 
-## Step 7 timeline
+## Timeline
 
-| Phase | Effort | What |
+| Phase | Status | What |
 |-------|--------|------|
-| **7A — Cursor MCP** | ~1–2 hrs first time | uv + Ollama + MCP config + vault docs in `data/` |
-| **7B — In-app help** | Half day+ | Wire Archival Assistant to RAG API |
+| **Product assistant** | **Built** | Backend context assistant via `POST /assistant/query` — [ASSISTANT.md](ASSISTANT.md) |
+| **Cursor MCP (optional)** | Local dev tooling | uv + Ollama + MCP config + vault docs in `data/` |
+| **LLM/RAG provider (optional)** | Roadmap | Plug document RAG behind the same API boundary |
 
-7A is optional dev tooling. 7B changes the product UI.
+Cursor MCP is optional dev tooling. It does not power the product UI.
 
 ## Quick start (Step 7A)
 

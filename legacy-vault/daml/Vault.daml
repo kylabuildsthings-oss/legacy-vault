@@ -72,6 +72,15 @@ template VaultAgreement
         archive self
         return archived
 
+    choice RenameVault : ContractId VaultAgreement
+      with
+        newName : Text
+      controller testator
+      do
+        renamed <- create this with name = newName
+        archive self
+        return renamed
+
 -- | Tokenized RWA row (Track 2) — visible to intended heir + admin.
 template TokenizedAsset
   with
@@ -103,6 +112,15 @@ template HeirAllocation
     signatory testator
     observer heir, admin
 
+    choice RenameHeirAllocationDisplay : ContractId HeirAllocation
+      with
+        newVaultName : Text
+      controller testator
+      do
+        renamed <- create this with vaultName = newVaultName
+        archive self
+        return renamed
+
 -- | Oracle release workflow (Track 3) — no asset/heir details.
 template OracleAssignment
   with
@@ -120,7 +138,18 @@ template OracleAssignment
       controller testator
       do
         assertMsg "Release must be idle to initiate verification" (releaseStatus == Idle)
-        create this with releaseStatus = PendingVerification
+        updated <- create this with releaseStatus = PendingVerification
+        archive self
+        return updated
+
+    choice RenameOracleAssignmentDisplay : ContractId OracleAssignment
+      with
+        newVaultName : Text
+      controller testator
+      do
+        renamed <- create this with vaultName = newVaultName
+        archive self
+        return renamed
 
     choice ConfirmRelease : ConfirmReleaseResult
       with

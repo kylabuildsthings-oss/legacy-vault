@@ -61,7 +61,7 @@ If you skip straight to `alex.h` before oracle confirms, you will **not** see be
 | Time | Login | Route | Show | Say (suggested) | Track |
 |------|-------|-------|------|-----------------|-------|
 | 0:00–0:25 | `sarah.m` | `/dashboard` → `/vaults/VLT-001` | **Tokenized Holdings** table on overview; vault detail **Asset Allocation** with Token ID, Class, Settlement columns | "Sarah's estate holds tokenized real-world assets on Canton—each with a registry ID and settlement lifecycle." | **2** |
-| 0:25–0:50 | `sarah.m` | `/vaults/new` | Tokenized asset list; privacy preview **Token registry · CANTON-SYNCED**; **Archival Assistant** chat → suggested prompt or **Initiate verification** | "OpenClaw guides vault setup and kicks off cryptographic verification—agentic workflow, not a chatbot wrapper." | **2 + 3** |
+| 0:25–0:50 | `sarah.m` | `/vaults/new` | Tokenized asset list; privacy preview **Token registry · CANTON-SYNCED**; **Archival Assistant** chat → suggested prompt or **Initiate verification** | "The Archival Assistant guides vault setup from live Canton context and kicks off cryptographic verification—agentic workflow, not a chatbot wrapper." | **2 + 3** |
 | 0:50–1:05 | `sarah.m` then `alex.h` | `/vaults/VLT-001` | **Visibility Architecture** subtitle; heir **black-bar redaction** for other heirs | "Same vault, different truth—Canton selective disclosure. Alex sees only his allocation." | **1** |
 | 1:05–1:25 | `oracle@lawfirm` | `/vaults/VLT-001` | Amber **Release verification pending** banner → **Confirm release trigger** | "Sterling Law oracle confirms the release trigger—atomic settlement queues on Canton." | **3** |
 | 1:25–1:45 | `alex.h` | `/dashboard` → `/ledger` (Settlements tab) | **Beneficiary payout pending** card; ledger rows: release trigger + payout pending | "Beneficiary sees payout status without seeing the full estate—settlement is role-scoped." | **3** |
@@ -233,7 +233,7 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 
 **Bullets:**
 
-- **OpenClaw Archival Assistant** on vault wizard—heir design, RWA, and verification prompts
+- **Archival Assistant** on vault wizard—heir design, RWA, and verification prompts (backend + Canton context)
 - **Initiate verification** → notifies oracle, sets release to pending
 - Oracle **Confirm release trigger** → atomic settlement queued
 - Heir **Beneficiary payout pending** + Ledger **Settlements** tab
@@ -241,7 +241,7 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 
 **Demo moment:** `/vaults/new` → oracle confirm → `alex.h` ledger Settlements
 
-**Speaker note:** Assistant is scripted mock today; architecture supports live RAG (roadmap).
+**Speaker note:** Assistant answers user questions from role-scoped Canton data via the backend. Opening copy is scripted; optional LLM/RAG is roadmap.
 
 ---
 
@@ -291,9 +291,9 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 |-------|--------|
 | React UI — role scoping, release workflow, Track 1–3 screens | **Built** |
 | Mock fixtures + session-persisted release state | **Built** |
-| Archival Assistant (scripted responses) | **Built (mock agent)** |
+| Archival Assistant (backend + Canton context) | **Built** |
 | Daml contracts on Canton | **Roadmap** |
-| Ollama / linkup_mcp live RAG | **Roadmap** |
+| Optional LLM/RAG assistant provider | **Roadmap** |
 | Deployed live URL | **Submission task** |
 
 **Speaker note:** Judges see product thinking and UI execution; backend is planned, not faked.

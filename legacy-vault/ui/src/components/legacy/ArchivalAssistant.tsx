@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { CheckCircle2, Send, Sparkles } from 'lucide-react'
 import { useReleaseWorkflow } from '@/context/ReleaseWorkflowContext'
+import { queryAssistant, type AssistantCitation } from '@/lib/api/assistant'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -30,6 +31,8 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
   const [messages, setMessages] = useState<AssistantMessage[]>(ASSISTANT_OPENING_MESSAGES)
   const [input, setInput] = useState('')
   const [verificationInitiated, setVerificationInitiated] = useState(false)
+  const [conversationId, setConversationId] = useState<string | undefined>()
+  const [loadingResponse, setLoadingResponse] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   function appendMessage(message: AssistantMessage) {
@@ -39,20 +42,37 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
     })
   }
 
-  function sendUserMessage(text: string) {
+  async function sendUserMessage(text: string) {
     const trimmed = text.trim()
-    if (!trimmed) return
+    if (!trimmed || loadingResponse) return
 
     appendMessage({ id: nextMessageId(), role: 'user', text: trimmed })
     setInput('')
+    setLoadingResponse(true)
 
-    window.setTimeout(() => {
+    try {
+      const response = await queryAssistant({
+        message: trimmed,
+        conversationId,
+        vaultId: DEMO_VAULT_ID,
+      })
+      setConversationId(response.conversationId)
+      appendMessage({
+        id: nextMessageId(),
+        role: 'assistant',
+        text: response.message,
+        citations: response.citations,
+      })
+    } catch {
       appendMessage({
         id: nextMessageId(),
         role: 'assistant',
         text: getAssistantResponse(trimmed),
+        citations: [{ label: 'local fallback', source: 'Scripted assistant response' }],
       })
-    }, 400)
+    } finally {
+      setLoadingResponse(false)
+    }
   }
 
   function handleInitiateVerification() {
@@ -82,7 +102,7 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
           <Sparkles className="size-4 text-primary" />
           Archival Assistant
           <span className="ml-auto text-[0.55rem] font-normal text-muted-foreground normal-case">
-            OpenClaw Active
+            Backend Active
           </span>
         </CardTitle>
       </CardHeader>
@@ -103,6 +123,15 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
               )}
             >
               <p>{message.text}</p>
+              {message.citations && message.citations.length > 0 && (
+                <ul className="mt-2 space-y-1 font-headline text-[0.55rem] tracking-wide text-muted-foreground uppercase">
+                  {message.citations.map((citation: AssistantCitation) => (
+                    <li key={`${citation.label}-${citation.source}`}>
+                      {citation.label} · {citation.source}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {message.action === 'initiate_verification' && !verificationInitiated && (
                 <Button
                   type="button"
@@ -130,6 +159,7 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
               type="button"
               className="rounded-sm border border-border bg-card px-2 py-1 font-headline text-[0.55rem] tracking-wide text-muted-foreground uppercase transition-colors hover:border-primary/40 hover:text-foreground"
               onClick={() => sendUserMessage(prompt)}
+              disabled={loadingResponse}
             >
               {prompt}
             </button>
@@ -154,7 +184,9 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
           </Button>
         </form>
 
-        <p className="font-headline text-xs text-[var(--lv-success)]">Oracle connection: [STABLE]</p>
+        <p className="font-headline text-xs text-[var(--lv-success)]">
+          {loadingResponse ? 'Assistant retrieval: [RUNNING]' : 'Assistant backend: [STABLE]'}
+        </p>
 
         <Button
           variant="outline"

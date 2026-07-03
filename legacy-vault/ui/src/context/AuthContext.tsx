@@ -18,7 +18,7 @@ import { clearReleaseOverrides } from '@/lib/mock/releaseWorkflow'
 
 interface AuthContextValue {
   user: SessionUser | null
-  login: (userId: string, password: string) => SessionUser | null
+  login: (userId: string, password: string) => Promise<SessionUser | null>
   logout: () => void
   homePath: string
 }
@@ -28,8 +28,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(() => loadSession())
 
-  const login = useCallback((userId: string, password: string) => {
-    const session = authenticate(userId, password)
+  const login = useCallback(async (userId: string, password: string) => {
+    const session = await authenticate(userId, password)
     if (!session) return null
     saveSession(session)
     setUser(session)

@@ -11,11 +11,16 @@ const browserOrigin =
     ? window.location.origin
     : 'http://localhost:5173'
 
+const rawBackendApi = import.meta.env.VITE_LEGACY_VAULT_API?.trim()
+
 /** Base URL without trailing slash — for fetch() paths. Blank → Vite proxy (relative /v1/...). */
 export const damlJsonApiUrl = rawApi ? rawApi.replace(/\/$/, '') : ''
 
 /** @daml/ledger requires an absolute httpBaseUrl ending in '/'. Blank → same-origin (proxied). */
 export const damlLedgerHttpUrl = rawApi ? `${damlJsonApiUrl}/` : `${browserOrigin}/`
+
+/** Product backend API. Ledger mode calls this first; the backend talks to Canton. */
+export const legacyVaultApiUrl = (rawBackendApi || 'http://localhost:4000').replace(/\/$/, '')
 
 export const damlLedgerId = import.meta.env.VITE_DAML_LEDGER_ID ?? 'sandbox'
 
@@ -28,6 +33,7 @@ export const ledgerDiagnostics = {
   rawApi: rawApi ?? '(unset → proxy)',
   fetchBaseUrl: damlJsonApiUrl || '(relative /v1 via Vite proxy)',
   ledgerHttpUrl: damlLedgerHttpUrl,
+  backendApiUrl: legacyVaultApiUrl,
   browserOrigin,
   ledgerId: damlLedgerId,
 }

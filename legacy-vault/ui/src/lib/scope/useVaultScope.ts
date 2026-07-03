@@ -27,7 +27,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
         () =>
           reject(
             new Error(
-              `Ledger request timed out after ${ms / 1000}s — the browser could not reach the JSON API.`,
+              `Ledger request timed out after ${ms / 1000}s — the browser could not reach the backend API.`,
             ),
           ),
         ms,
@@ -197,7 +197,7 @@ export function useVaultScope(role: UserRole, partyId: string): VaultScopeResult
       } catch (err: unknown) {
         if (cancelled) return
         const message = err instanceof Error ? err.message : 'Ledger connection failed'
-        const detail = `API: ${ledgerDiagnostics.fetchBaseUrl} · ledger: ${ledgerDiagnostics.ledgerHttpUrl} · origin: ${ledgerDiagnostics.browserOrigin}`
+        const detail = `Backend: ${ledgerDiagnostics.backendApiUrl} · ledger: ${ledgerDiagnostics.ledgerHttpUrl} · origin: ${ledgerDiagnostics.browserOrigin}`
         console.error('[LegacyVault] Ledger fetch failed:', message, {
           role,
           partyId,

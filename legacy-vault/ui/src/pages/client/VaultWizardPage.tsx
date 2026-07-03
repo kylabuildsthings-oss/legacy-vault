@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { ArchivalAssistant } from '@/components/legacy/ArchivalAssistant'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { createVault } from '@/lib/api/vaults'
 import { TOKENIZED_ASSETS } from '@/lib/mock/tokenizedAssets'
 import {
   Select,
@@ -21,6 +22,7 @@ interface HeirDraft {
 }
 
 export function VaultWizardPage() {
+  const navigate = useNavigate()
   const [vaultName, setVaultName] = useState('My Will')
   const [heirInput, setHeirInput] = useState('')
   const [heirs, setHeirs] = useState<HeirDraft[]>([
@@ -28,12 +30,46 @@ export function VaultWizardPage() {
   ])
   const [oracleId, setOracleId] = useState('ORC-992-XXXX')
   const [checkIn, setCheckIn] = useState('30')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [createdVaultId, setCreatedVaultId] = useState<string | null>(null)
 
   function addHeir() {
     const name = heirInput.trim()
     if (!name) return
     setHeirs((prev) => [...prev, { id: `heir-${prev.length}`, name }])
     setHeirInput('')
+  }
+
+  async function submitVault() {
+    setSubmitting(true)
+    setSubmitError(null)
+    setCreatedVaultId(null)
+    try {
+      const result = await createVault({
+        name: vaultName,
+        jurisdiction: 'Geneva, CH',
+        oracleLedgerParty: oracleId.trim() === 'Oracle_Sterling' ? oracleId.trim() : 'Oracle_Sterling',
+        heirs: heirs.map((heir, index) => ({
+          name: heir.name,
+          ledgerParty: index === 0 ? 'Heir_Alex' : 'Heir_Maya',
+          allocationLabel:
+            index === 0 ? 'Primary heir — 60%' : index === 1 ? 'Secondary heir — 40%' : undefined,
+        })),
+        assets: TOKENIZED_ASSETS.map((asset, index) => ({
+          name: asset.label,
+          tokenId: asset.id,
+          assetClass: asset.type,
+          intendedHeirIndex: Math.min(index, Math.max(heirs.length - 1, 0)),
+        })),
+      })
+      setCreatedVaultId(result.vaultId)
+      window.setTimeout(() => navigate('/vaults'), 800)
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : 'Create vault failed')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -61,6 +97,17 @@ export function VaultWizardPage() {
               placeholder="e.g., My Will"
             />
           </div>
+
+          {submitError && (
+            <div className="rounded-sm border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {submitError}
+            </div>
+          )}
+          {createdVaultId && (
+            <div className="rounded-sm border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-700">
+              Vault {createdVaultId} created on Canton. Redirecting to vaults…
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className="font-headline text-[0.65rem] tracking-widest uppercase">
@@ -186,8 +233,13 @@ export function VaultWizardPage() {
             <Button variant="ghost" type="button">
               SAVE DRAFT
             </Button>
-            <Button type="button" className="font-headline text-xs tracking-widest">
-              NEXT
+            <Button
+              type="button"
+              className="font-headline text-xs tracking-widest"
+              onClick={submitVault}
+              disabled={submitting}
+            >
+              {submitting ? 'CREATING ON CANTON…' : 'NEXT'}
             </Button>
           </div>
         </div>
