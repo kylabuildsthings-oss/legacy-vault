@@ -38,9 +38,11 @@ flowchart TB
 
 **Developer fallback:** set `VITE_USE_MOCK_LEDGER=true` in `legacy-vault/ui/.env.local` to run UI-only with mock fixtures (no Canton/backend required).
 
-**Built today:** full product backend, UI wired to API in live mode, Archival Assistant with role-scoped Canton context, vault creation on Canton, optional Postgres, API hardening tests (42 passing), and LLM/RAG provider scaffold.
+**Product status:** Legacy Vault is a **complete hackathon-ready product** on the local Canton sandbox — React UI, backend API, Daml contracts, role-scoped vault workflows, Archival Assistant, vault create/rename on Canton, and **42 passing API tests** plus 5 Daml Script tests.
 
-**Not yet:** Canton Network DevNet / public validator deployment, deployed live URL, live LLM/RAG model wiring.
+**Submission remaining** (deliverables, not missing product features): public demo URL, 3-minute demo video, presentation deck. See [Hackathon submission](#hackathon-submission) below.
+
+**Optional later:** Canton Network DevNet deployment and live LLM/RAG model (scaffold in place — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)).
 
 Contract design: [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · UI wiring: [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md)
 
@@ -81,10 +83,10 @@ Four parties, one workflow:
 
 | Criterion | How Legacy Vault delivers |
 |-----------|---------------------------|
+| **Challenge fit** | One institutional workflow spanning Tracks 1–3: Canton privacy, tokenized RWAs, and agent-led oracle settlement |
 | **Technical execution** | Daml contracts + 5 Script tests; backend API with 42 tests; UI → API → Canton live stack; `npm run build` passes |
-| **Originality** | Estate vault with **Canton selective disclosure** — multi-template privacy; oracle-gated institutional release |
-| **UX & design** | Role-scoped dashboards; Visibility Architecture; persistent **Live Canton Backend** / **Demo Data Mode** badges |
-| **Real-world applicability** | HNWI / trust-company workflow; Forbes-cited visibility problem; tokenized RWA registry + beneficiary settlement |
+| **Institutional relevance** | HNWI estate planning, law-firm oracle, trust administrator — privacy-sensitive wealth transfer on Canton |
+| **Product clarity** | Live-first README and demo flow; **Live Canton Backend** / **Demo Data Mode** badges; role-scoped UI judges can follow |
 
 ### Key features
 
@@ -95,20 +97,18 @@ Four parties, one workflow:
 - Release workflow: oracle confirm → beneficiary payout → Settlements ledger + Security Logs
 - Admin pending releases queue
 
-### Built vs roadmap
+### What's included
 
-| Layer | Status |
-|-------|--------|
-| React UI + role-scoped release workflow | **Built** |
-| Daml contracts + Script tests | **Built** — [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · `./scripts/run-daml-tests.sh` |
-| Canton sandbox + backend API | **Built** — `./scripts/dev-ledger.sh` · `./scripts/dev-api.sh` |
-| UI → backend API (live mode) | **Built** — UI does not call Canton directly |
-| Vault create / rename on Canton | **Built** — `POST /vaults` · `PATCH /vaults/:vaultId` |
-| Archival Assistant | **Built** — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
-| Postgres persistence (optional) | **Built** — `./scripts/db-migrate.sh` |
-| API hardening + tests | **Built** — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
-| LLM/RAG provider | **Planned** — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md) |
-| Canton Network DevNet / public URL | **Submission task** |
+| Component | Status |
+|-----------|--------|
+| React UI + role-scoped release workflow | Included |
+| Daml contracts + Script tests | Included — [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · `./scripts/run-daml-tests.sh` |
+| Canton sandbox + backend API | Included — `./scripts/dev-ledger.sh` · `./scripts/dev-api.sh` |
+| UI → backend API (live mode) | Included — UI does not call Canton directly |
+| Vault create / rename on Canton | Included — `POST /vaults` · `PATCH /vaults/:vaultId` |
+| Archival Assistant (deterministic + Canton context) | Included — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
+| Postgres persistence (optional) | Included — `./scripts/db-migrate.sh` |
+| API hardening + tests | Included — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
 
 ---
 
@@ -171,10 +171,11 @@ In **live mode**, release state persists on Canton. In **Demo Data Mode**, sign 
 
 | Deliverable | Status |
 |-------------|--------|
-| Public repository | [github.com/kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault) |
-| Presentation deck | Add link when ready |
-| 3-minute demo video | Add link when ready |
-| Live product URL | Add link when deployed |
+| Public repository | Done — [github.com/kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault) |
+| Working product (local Canton stack) | Done — see [Quick start](#quick-start) |
+| Presentation deck | In progress |
+| 3-minute demo video | In progress |
+| Public demo URL | In progress — deploy UI + API |
 
 Demo script and pitch deck: [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md)
 
