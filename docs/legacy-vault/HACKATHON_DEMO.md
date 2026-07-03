@@ -246,7 +246,7 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 
 **Demo moment:** `/vaults/new` → oracle confirm → `alex.h` ledger Settlements
 
-**Speaker note:** Assistant answers user questions from role-scoped Canton data via the backend. Opening copy is scripted; optional LLM/RAG is roadmap.
+**Speaker note:** Assistant answers from role-scoped Canton data via the backend (deterministic engine). Optional LLM/RAG is planned — see [ASSISTANT_RAG_PLAN.md](ASSISTANT_RAG_PLAN.md).
 
 ---
 
@@ -279,10 +279,11 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 - **Privacy:** multi-party workflows with selective disclosure (Track 1)
 - **Tokenization:** RWA registry and settlement status per asset (Track 2)
 - **Atomic settlement:** single release trigger coordinates beneficiary payout (Track 3)
-- **Daml smart contracts:** party-scoped visibility (testator, heir, oracle, admin) — roadmap
+- **Daml smart contracts:** party-scoped visibility (testator, heir, oracle, admin) — **built on Canton sandbox**
+- **Backend API:** auth, vaults, assistant, release — **built** (`legacy-vault/api`)
 - References: [Canton docs](https://docs.canton.network/) · [Daml docs](https://docs.daml.com/)
 
-**Speaker note:** Architecture is credible; implementation layer is honest on Slide 10.
+**Speaker note:** Contracts and backend are built and running on the local Canton sandbox; DevNet deployment is the submission follow-on.
 
 ---
 

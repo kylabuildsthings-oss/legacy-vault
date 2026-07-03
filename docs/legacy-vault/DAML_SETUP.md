@@ -195,16 +195,18 @@ Open http://localhost:5173 — demo logins in [README.md](../../README.md) (`vau
 
 ---
 
-## 7 — Wiring UI to Daml (later)
+## 7 — Wiring UI to Daml
 
-Not implemented yet. Typical path:
+**Built.** The React UI calls the product backend API, which talks to the Daml JSON API on the Canton sandbox.
 
-1. `daml codegen js` (or project template output) → `ui/daml.js` or npm package
-2. Configure JSON API endpoint in UI env (see [`UI_LEDGER_INTEGRATION.md`](UI_LEDGER_INTEGRATION.md))
-3. Set `VITE_USE_MOCK_LEDGER=false` in `legacy-vault/ui/.env.local` — [`useVaultScope`](../../legacy-vault/ui/src/lib/scope/useVaultScope.ts) queries the ledger per role
-4. Map session user IDs (`sarah.m`, etc.) to allocated **party IDs** on the sandbox
+1. `./scripts/dev-ledger.sh` — Canton sandbox + JSON API
+2. `./scripts/dev-api.sh` — backend API (auth, vaults, assistant, release)
+3. Copy [`legacy-vault/ui/.env.example`](../../legacy-vault/ui/.env.example) to `.env.local` (defaults to live mode)
+4. `./scripts/dev-ui.sh` — UI shows **Live Canton Backend** when connected
 
-Keep mock mode until party allocation and auth are defined.
+Session user IDs (`sarah.m`, etc.) map to ledger parties via the backend. See [`UI_LEDGER_INTEGRATION.md`](UI_LEDGER_INTEGRATION.md).
+
+For UI-only development without Canton/backend, set `VITE_USE_MOCK_LEDGER=true` — the UI labels this **Demo Data Mode**.
 
 ---
 

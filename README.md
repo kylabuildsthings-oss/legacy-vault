@@ -19,27 +19,28 @@ flowchart TB
   UI["React UI :5173"]
   API["Legacy Vault API :4000"]
   JSON["Daml JSON API :7575"]
-  Canton["Canton sandbox :6865"]
-  Daml["Vault.daml contracts .dar"]
+  Canton["Canton sandbox"]
+  Daml["Vault.daml .dar"]
 
   UI -->|"Bearer session + REST"| API
-  UI -->|"mock mode only"| UI
   API -->|"server-side JWT"| JSON
   JSON -->|"gRPC Ledger API"| Canton
-  Canton -->|"runs / enforces"| Daml
+  Canton -->|"enforces"| Daml
 ```
 
 | Layer | What it does |
 |-------|----------------|
 | **Daml** | Smart-contract language — templates and choices in [`legacy-vault/daml/Vault.daml`](legacy-vault/daml/Vault.daml) |
 | **Canton** | Ledger runtime that enforces privacy via signatory/observer sets; `./scripts/dev-ledger.sh` runs `daml start` |
-| **JSON API** | HTTP bridge on port `7575`; the **backend API** queries and exercises choices in ledger mode |
+| **JSON API** | HTTP bridge on port `7575`; the **backend API** queries and exercises choices in live mode |
 | **Backend API** | Fastify server on port `4000` — auth, vaults, assistant, release commands; UI calls this instead of Canton directly |
-| **Mock mode** | Developer fallback — fixture data when Canton/backend are not running; UI labels this **Demo Data Mode** |
+| **Demo Data Mode** | Developer fallback — UI fixture data when Canton/backend are not running; labelled clearly in the app |
 
-**Built today:** full product backend (Phases 1–7), UI wired to API in ledger mode, backend Archival Assistant with role-scoped Canton context, vault creation on Canton, Postgres foundation, Phase 8 hardening tests, and LLM/RAG provider scaffold.
+**Developer fallback:** set `VITE_USE_MOCK_LEDGER=true` in `legacy-vault/ui/.env.local` to run UI-only with mock fixtures (no Canton/backend required).
 
-**Not yet:** Canton Network DevNet / public validator deployment, deployed live URL, live LLM/RAG model wiring (scaffold + plan only).
+**Built today:** full product backend, UI wired to API in live mode, Archival Assistant with role-scoped Canton context, vault creation on Canton, optional Postgres, API hardening tests (42 passing), and LLM/RAG provider scaffold.
+
+**Not yet:** Canton Network DevNet / public validator deployment, deployed live URL, live LLM/RAG model wiring.
 
 Contract design: [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · UI wiring: [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md)
 
@@ -78,42 +79,36 @@ Four parties, one workflow:
 
 ### Judging criteria alignment
 
-Canton Network Hackathon judges score on four dimensions. Legacy Vault maps each to concrete UI and ledger evidence:
-
 | Criterion | How Legacy Vault delivers |
 |-----------|---------------------------|
-| **Technical execution** | Daml contracts compile; `./scripts/run-daml-tests.sh` (5 tests); UI ledger adapter (`ui/src/lib/ledger/`); `npm run build` passes; visibility matrix + contract spec documented |
-| **Originality** | Estate vault with **Canton selective disclosure** — multi-template privacy (not one public contract); oracle-gated release for institutional workflow |
-| **UX & design** | Role-scoped dashboards (4 personas); Visibility Architecture; persistent **Live Canton Backend** / **Demo Data Mode** badges |
-| **Real-world applicability** | HNWI / trust-company workflow; Forbes-cited visibility problem; tokenized RWA registry + beneficiary settlement queue |
+| **Technical execution** | Daml contracts + 5 Script tests; backend API with 42 tests; UI → API → Canton live stack; `npm run build` passes |
+| **Originality** | Estate vault with **Canton selective disclosure** — multi-template privacy; oracle-gated institutional release |
+| **UX & design** | Role-scoped dashboards; Visibility Architecture; persistent **Live Canton Backend** / **Demo Data Mode** badges |
+| **Real-world applicability** | HNWI / trust-company workflow; Forbes-cited visibility problem; tokenized RWA registry + beneficiary settlement |
 
-### Key features (demo-ready UI)
+### Key features
 
-- Role-scoped dashboards (HNWI, Heir, Oracle, Admin shells)
+- Role-scoped dashboards (HNWI, Heir, Oracle, Admin)
 - Tokenized Holdings + Canton registry columns (Token ID, Class, Settlement)
 - Visibility Architecture with heir redaction visualization
-- Archival Assistant (backend + Canton context) with Initiate verification
+- Archival Assistant (deterministic backend + Canton context) with Initiate verification
 - Release workflow: oracle confirm → beneficiary payout → Settlements ledger + Security Logs
 - Admin pending releases queue
 
-### Demo-ready vs roadmap
+### Built vs roadmap
 
 | Layer | Status |
 |-------|--------|
-| React UI + mock release workflow | **Built** |
-| Daml contracts (`Vault.daml`) + [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) | **Built** |
-| Canton sandbox dev (`./scripts/dev-ledger.sh`) | **Built** |
-| Backend API (`legacy-vault/api`) | **Built** — auth, vaults, assistant, release, rename |
-| UI → backend API (ledger mode) | **Built** — UI no longer calls Canton directly |
-| Ledger-backed vault creation (`POST /vaults`) | **Built** |
-| Backend Archival Assistant | **Built** — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
-| Postgres product persistence (optional) | **Built** — `./scripts/db-migrate.sh` |
-| API hardening + tests (Phase 8B) | **Built** — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
-| LLM/RAG provider scaffold | **Planned** — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md) |
-| Daml Script tests (visibility + release) | **Built** — `./scripts/run-daml-tests.sh` |
-| Cursor MCP (linkup_mcp) | **Optional dev tooling** — [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
-| Canton Network DevNet deploy | **Roadmap** |
-| Deployed public URL | **Submission task** |
+| React UI + role-scoped release workflow | **Built** |
+| Daml contracts + Script tests | **Built** — [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · `./scripts/run-daml-tests.sh` |
+| Canton sandbox + backend API | **Built** — `./scripts/dev-ledger.sh` · `./scripts/dev-api.sh` |
+| UI → backend API (live mode) | **Built** — UI does not call Canton directly |
+| Vault create / rename on Canton | **Built** — `POST /vaults` · `PATCH /vaults/:vaultId` |
+| Archival Assistant | **Built** — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
+| Postgres persistence (optional) | **Built** — `./scripts/db-migrate.sh` |
+| API hardening + tests | **Built** — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
+| LLM/RAG provider | **Planned** — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md) |
+| Canton Network DevNet / public URL | **Submission task** |
 
 ---
 
@@ -128,29 +123,26 @@ Canton Network Hackathon judges score on four dimensions. Legacy Vault maps each
 # Terminal 2 — Backend API
 ./scripts/dev-api.sh
 
-# Terminal 3 — UI (live mode)
+# Terminal 3 — UI (live mode — .env.example defaults to VITE_USE_MOCK_LEDGER=false)
 cp legacy-vault/ui/.env.example legacy-vault/ui/.env.local
 ./scripts/dev-ui.sh
 ```
 
-Open http://localhost:5173 and sign in as a demo user. The UI shows a **Live Canton Backend** badge when connected. Data comes from Canton via the backend API — not mock fixtures.
+Open http://localhost:5173 and sign in as a demo user. The UI shows a **Live Canton Backend** badge when connected.
 
 Sign in after starting the API so the UI stores a backend session token. If you logged in before the backend was running, sign out and sign back in.
 
 API health check: http://localhost:4000/health
 
-See [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md) for party mapping and env vars.
-
 **Developer fallback — UI-only mock mode (one terminal):**
 
 ```bash
 # legacy-vault/ui/.env.local
-# VITE_USE_MOCK_LEDGER=true
-
+VITE_USE_MOCK_LEDGER=true
 ./scripts/dev-ui.sh
 ```
 
-The UI labels this **Demo Data Mode** so judges and users can tell fixture data apart from live Canton.
+The UI labels this **Demo Data Mode**.
 
 ### Demo accounts
 
@@ -167,11 +159,11 @@ Password for all accounts: `vault`
 
 **Suggested demo flow:**
 
-1. `sarah.m` → Tokenized Holdings on dashboard → `/vaults/new` wizard + Archival Assistant
+1. `sarah.m` → Tokenized Holdings → `/vaults/new` wizard + Archival Assistant
 2. `oracle@lawfirm` → `/vaults/VLT-001` → **Confirm release trigger**
 3. `alex.h` → Beneficiary payout card → Ledger **Settlements** tab
 
-Sign out between recording takes to reset release workflow state in **mock mode**. In **ledger mode**, release state persists on Canton (not `sessionStorage`).
+In **live mode**, release state persists on Canton. In **Demo Data Mode**, sign out to reset mock release state.
 
 ---
 
@@ -184,6 +176,8 @@ Sign out between recording takes to reset release workflow state in **mock mode*
 | 3-minute demo video | Add link when ready |
 | Live product URL | Add link when deployed |
 
+Demo script and pitch deck: [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md)
+
 ---
 
 ## For developers
@@ -194,176 +188,49 @@ Sign out between recording takes to reset release workflow state in **mock mode*
 LEGACYVAULT/
 ├── legacy-vault/
 │   ├── daml/              # Daml contracts + Scripts (Setup, Tests)
-│   ├── daml.yaml
 │   ├── api/               # Fastify backend — auth, vaults, assistant, ledger proxy
 │   └── ui/                # React + Vite frontend
-│       └── src/lib/api/   # Backend API client (ledger mode)
-│       └── src/lib/ledger/  # Mock ledger + legacy adapter
-├── linkup_mcp/            # Cursor MCP + RAG (gitignored locally)
-├── decentralized-will-management/  # UI reference only
+│       └── src/lib/api/   # Backend API client (live mode)
 ├── docs/legacy-vault/     # Project docs
-└── scripts/               # dev-ui.sh, dev-ledger.sh, setup-daml.sh, …
+└── scripts/               # dev-ui.sh, dev-ledger.sh, dev-api.sh, …
 ```
-
-### Project status
-
-| Area | Status |
-|------|--------|
-| UI (Steps 1, 3–6) + hackathon tracks UI | Done |
-| Daml backend onboarding | Done — [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · `./scripts/setup-daml.sh` |
-| Daml contracts + Script tests | Done — [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · `./scripts/run-daml-tests.sh` |
-| UI ledger integration (mock mode) | Done — [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md) |
-| Backend API (Phases 1–7) | Done — [legacy-vault/api](legacy-vault/api) · `./scripts/dev-api.sh` |
-| Server-side ledger (JWT, parties, JSON API client) | Done |
-| Backend auth + protected routes | Done — `/auth/login`, `/me`, role-gated `/vaults` |
-| Postgres product persistence (optional) | Done — `./scripts/db-migrate.sh` |
-| Ledger-backed vault creation | Done — `POST /vaults` creates Daml contracts on Canton |
-| Vault rename | Done — `PATCH /vaults/:vaultId` (HNWI only) |
-| Backend Archival Assistant | Done — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
-| API hardening + tests (Phase 8B) | Done — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
-| LLM/RAG provider scaffold | Planned — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md) |
-| linkup_mcp (optional Cursor MCP) | Local setup — [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
-| Canton Network DevNet deploy | Roadmap |
-
-### Recent product changes (Phases 1–8)
-
-**Backend API (`legacy-vault/api/`)**
-
-- Fastify server with CORS, structured config, and `/health`
-- Session auth (`POST /auth/login`, `GET /me`) with TTL expiry on tokens
-- Server-side Canton integration: Daml JWT signing, party resolution, JSON API client (10s timeout)
-- Protected vault routes: list, snapshot, release commands, create (`POST /vaults`), rename (`PATCH /vaults/:vaultId`)
-- Optional Postgres: migrations for users, orgs, drafts, documents, audit events, assistant conversations (`./scripts/db-migrate.sh`)
-- **42 passing API tests** — session, routes, assistant intent routing, role-aware policies
-
-**UI → backend wiring**
-
-- React UI calls the backend API in ledger mode (no direct Canton from the browser)
-- `AuthContext` stores backend session token; login flows through `/auth/login`
-- Vault wizard submits to `POST /vaults`; Archival Assistant calls `POST /assistant/query`
-- Assistant panel shows **Backend Active** (deterministic engine, not a third-party agent)
-
-**Archival Assistant**
-
-- Deterministic rule engine over role-scoped Canton vault snapshots
-- Intent routing: guidance questions (`how`, `what if`, `change`, `designate`, …) vs status summaries
-- Role-aware answers for HNWI, heir, oracle, and admin personas
-- Provider scaffold: `deterministic` (default), `localRag`, `hostedLlm` — see [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)
-- Safety policies: block chat mutations, redact ledger fields for LLM context, validate responses
-- Docs: [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md)
-
-**Daml / ledger**
-
-- `RenameVault`, `RenameOracleAssignmentDisplay`, `RenameHeirAllocationDisplay` choices in `Vault.daml`
-- Migration fallback for older package contracts: archive + recreate when native rename unavailable
-- Snapshot filtering: oracle/heir rows matched to active agreement name; skip archived agreements
-
-**Phase 8 hardening**
-
-- Generic 500 error responses with internal logging
-- Configurable `SESSION_TTL_SECONDS`
-- Test suite: `cd legacy-vault/api && npm test`
-- Details: [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md)
-
-**New scripts**
-
-| Script | Purpose |
-|--------|---------|
-| `./scripts/dev-api.sh` | Start backend API at http://localhost:4000 |
-| `./scripts/db-migrate.sh` | Apply Postgres migrations + demo seed data |
-
-**Key API environment variables** (see `legacy-vault/api/.env.example`)
-
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | Optional Postgres connection |
-| `SESSION_SECRET` | Session token signing |
-| `SESSION_TTL_SECONDS` | Token expiry (default 24h) |
-| `DAML_JSON_API_URL` | Canton JSON API (default `http://127.0.0.1:7575`) |
-| `DAML_PACKAGE_ID` | Deployed Daml package ID |
-| `ASSISTANT_PROVIDER` | `deterministic` \| `localRag` \| `hostedLlm` |
-
-Step completion details: [STEP1_COMPLETE.md](docs/legacy-vault/STEP1_COMPLETE.md) · [STEP4_COMPLETE.md](docs/legacy-vault/STEP4_COMPLETE.md) · [STEP5_COMPLETE.md](docs/legacy-vault/STEP5_COMPLETE.md) · [STEP6_ADMIN_COMPLETE.md](docs/legacy-vault/STEP6_ADMIN_COMPLETE.md)
-
-Role visibility matrix: [ROLE_VISIBILITY_MATRIX.md](docs/legacy-vault/ROLE_VISIBILITY_MATRIX.md)
 
 ### Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `./scripts/dev-ui.sh` | Start React UI at http://localhost:5173 |
-| `./scripts/dev-api.sh` | Start backend API at http://localhost:4000 |
-| `./scripts/db-migrate.sh` | Apply API Postgres migrations and demo seed data |
 | `./scripts/dev-ledger.sh` | Build + `daml start` (Canton sandbox + JSON API :7575) |
+| `./scripts/dev-api.sh` | Start backend API at http://localhost:4000 |
+| `./scripts/dev-ui.sh` | Start React UI at http://localhost:5173 |
 | `./scripts/setup-daml.sh` | Check Java + Daml SDK readiness |
 | `./scripts/run-daml-tests.sh` | Run 5 Daml Script visibility/workflow tests |
-| `./scripts/install-java.sh` | Install JDK 17 for Daml |
-| `./scripts/install-daml.sh` | Install Daml SDK |
-| `./scripts/sync-rag-corpus.sh` | Copy vault docs into local `linkup_mcp/data/` for RAG |
-
-### Archival Assistant
-
-The in-app **Archival Assistant** is backend-powered: `POST /assistant/query` with role-scoped Canton vault context. Default provider is **deterministic** (rule engine + intent routing). LLM/RAG is scaffolded but not wired to a live model yet. See [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) and [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md).
-
-For document Q&A while building in Cursor, you can optionally set up **linkup_mcp** locally (gitignored — not required for the product UI):
-
-1. Clone or restore `linkup_mcp/` beside this project
-2. `ollama pull llama3.2` · `cd linkup_mcp && uv sync --python 3.12`
-3. `./scripts/sync-rag-corpus.sh`
-4. Configure `~/.cursor/mcp.json` — see [PREREQUISITES.md](docs/legacy-vault/PREREQUISITES.md)
-
-Full guide: [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md)
+| `./scripts/db-migrate.sh` | Apply Postgres migrations + demo seed (optional) |
 
 ### Prerequisites
 
 | Tool | Required for | Notes |
 |------|--------------|-------|
-| Node.js 18+ | UI | Required |
-| npm | UI deps | Required |
-| Java 17 | Daml / Canton sandbox | Ledger mode — see [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · `./scripts/install-java.sh` |
-| Daml SDK 2.2+ | Contracts + sandbox | Ledger mode — see [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · `./scripts/install-daml.sh` |
-| uv + Ollama + `llama3.2` | Optional Cursor MCP (linkup_mcp) | Not required for the product UI — see [LINKUP_MCP.md](docs/legacy-vault/LINKUP_MCP.md) |
+| Node.js 18+ | UI + API | Required |
+| Java 17 | Daml / Canton | [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) |
+| Daml SDK 2.2+ | Contracts + sandbox | [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) |
 
-Details: [docs/legacy-vault/PREREQUISITES.md](docs/legacy-vault/PREREQUISITES.md)
-
-**Daml backend:** [DAML_SETUP.md](docs/legacy-vault/DAML_SETUP.md) · run `./scripts/setup-daml.sh`
-
-### API tests
+### Tests
 
 ```bash
-cd legacy-vault/api
-npm test
-npm run typecheck
+./scripts/run-daml-tests.sh
+cd legacy-vault/api && npm test && npm run typecheck
+cd legacy-vault/ui && npm run build
 ```
-
-### Full stack (ledger mode)
-
-```bash
-# Terminal 1 — Canton
-./scripts/dev-ledger.sh
-
-# Terminal 2 — Backend API
-./scripts/dev-api.sh
-
-# Terminal 3 — UI
-cp legacy-vault/ui/.env.example legacy-vault/ui/.env.local
-# Set VITE_USE_MOCK_LEDGER=false in .env.local
-./scripts/dev-ui.sh
-```
-
-Full guide: [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md)
 
 ### Backend API reference
 
 ```bash
-curl http://localhost:4000/ledger/parties
-curl http://localhost:4000/ledger/sessions/sarah.m/party
-```
-
-Authenticated backend flow:
-
-```bash
+curl http://localhost:4000/health
 curl -X POST http://localhost:4000/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"userId":"sarah.m","password":"vault"}'
 ```
+
+Key env vars: see [`legacy-vault/api/.env.example`](legacy-vault/api/.env.example) (`SESSION_JWT_SECRET`, `DAML_JSON_API`, `DAML_PACKAGE_ID`) and [`legacy-vault/ui/.env.example`](legacy-vault/ui/.env.example) (`VITE_USE_MOCK_LEDGER`).
+
+Further reading: [ROLE_VISIBILITY_MATRIX.md](docs/legacy-vault/ROLE_VISIBILITY_MATRIX.md) · [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) · [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md)

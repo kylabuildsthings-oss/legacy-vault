@@ -319,7 +319,7 @@ When oracle exercises `ConfirmRelease`, create rows matching [`buildReleaseLedge
 | [`ReleaseWorkflowContext.tsx`](../../legacy-vault/ui/src/context/ReleaseWorkflowContext.tsx) | `confirmRelease` → exercise `ConfirmRelease`; `setPendingVerification` → `InitiateVerification` |
 | [`fixtures.ts`](../../legacy-vault/ui/src/lib/mock/fixtures.ts) | Fallback when `VITE_USE_MOCK_LEDGER=true` |
 
-Env vars (future): `VITE_USE_MOCK_LEDGER`, `VITE_DAML_JSON_API`, `VITE_DAML_LEDGER_ID`.
+Env vars: `VITE_USE_MOCK_LEDGER`, `VITE_LEGACY_VAULT_API`, `VITE_DAML_LEDGER_ID` — see [`UI_LEDGER_INTEGRATION.md`](UI_LEDGER_INTEGRATION.md).
 
 ---
 
