@@ -28,9 +28,11 @@ export class ErrorBoundary extends Component<Props, State> {
           </h1>
           <p className="max-w-md text-sm text-[#6b6560]">{this.state.error.message}</p>
           <p className="max-w-md text-xs text-[#6b6560]">
-            Check the browser console for details. For demo fixtures, set{' '}
+            Check the browser console for details. For a UI-only demo with fixture data, set{' '}
             <code className="rounded bg-white px-1">VITE_USE_MOCK_LEDGER=true</code> in{' '}
             <code className="rounded bg-white px-1">.env.local</code> and restart the dev server.
+            For live Canton, run <code className="rounded bg-white px-1">./scripts/dev-ledger.sh</code>{' '}
+            and <code className="rounded bg-white px-1">./scripts/dev-api.sh</code>.
           </p>
           <button
             type="button"

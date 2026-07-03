@@ -35,7 +35,7 @@ flowchart TB
 | **Canton** | Ledger runtime that enforces privacy via signatory/observer sets; `./scripts/dev-ledger.sh` runs `daml start` |
 | **JSON API** | HTTP bridge on port `7575`; the **backend API** queries and exercises choices in ledger mode |
 | **Backend API** | Fastify server on port `4000` — auth, vaults, assistant, release commands; UI calls this instead of Canton directly |
-| **Mock mode** | Default (`VITE_USE_MOCK_LEDGER=true`); fixture data in the UI; toggle via `.env.local` |
+| **Mock mode** | Developer fallback — fixture data when Canton/backend are not running; UI labels this **Demo Data Mode** |
 
 **Built today:** full product backend (Phases 1–7), UI wired to API in ledger mode, backend Archival Assistant with role-scoped Canton context, vault creation on Canton, Postgres foundation, Phase 8 hardening tests, and LLM/RAG provider scaffold.
 
@@ -84,7 +84,7 @@ Canton Network Hackathon judges score on four dimensions. Legacy Vault maps each
 |-----------|---------------------------|
 | **Technical execution** | Daml contracts compile; `./scripts/run-daml-tests.sh` (5 tests); UI ledger adapter (`ui/src/lib/ledger/`); `npm run build` passes; visibility matrix + contract spec documented |
 | **Originality** | Estate vault with **Canton selective disclosure** — multi-template privacy (not one public contract); oracle-gated release for institutional workflow |
-| **UX & design** | Role-scoped dashboards (4 personas); Visibility Architecture; Stitch-aligned institutional UI; mock + ledger mode banner |
+| **UX & design** | Role-scoped dashboards (4 personas); Visibility Architecture; persistent **Live Canton Backend** / **Demo Data Mode** badges |
 | **Real-world applicability** | HNWI / trust-company workflow; Forbes-cited visibility problem; tokenized RWA registry + beneficiary settlement queue |
 
 ### Key features (demo-ready UI)
@@ -119,15 +119,7 @@ Canton Network Hackathon judges score on four dimensions. Legacy Vault maps each
 
 ## Quick start
 
-**Mock mode (one terminal):**
-
-```bash
-./scripts/dev-ui.sh
-```
-
-Open http://localhost:5173 — Legacy Vault login screen.
-
-**Full stack — Canton + backend API + UI (three terminals, ledger mode):**
+**Recommended — live Canton full stack (three terminals):**
 
 ```bash
 # Terminal 1 — Canton sandbox + JSON API
@@ -136,17 +128,29 @@ Open http://localhost:5173 — Legacy Vault login screen.
 # Terminal 2 — Backend API
 ./scripts/dev-api.sh
 
-# Terminal 3 — UI (ledger mode)
+# Terminal 3 — UI (live mode)
 cp legacy-vault/ui/.env.example legacy-vault/ui/.env.local
-# Edit .env.local: VITE_USE_MOCK_LEDGER=false
 ./scripts/dev-ui.sh
 ```
 
-Sign in as a demo user after starting the API — the UI stores a backend session token. If you logged in before auth was added, sign out and sign back in.
+Open http://localhost:5173 and sign in as a demo user. The UI shows a **Live Canton Backend** badge when connected. Data comes from Canton via the backend API — not mock fixtures.
+
+Sign in after starting the API so the UI stores a backend session token. If you logged in before the backend was running, sign out and sign back in.
+
+API health check: http://localhost:4000/health
 
 See [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md) for party mapping and env vars.
 
-API health check: http://localhost:4000/health
+**Developer fallback — UI-only mock mode (one terminal):**
+
+```bash
+# legacy-vault/ui/.env.local
+# VITE_USE_MOCK_LEDGER=true
+
+./scripts/dev-ui.sh
+```
+
+The UI labels this **Demo Data Mode** so judges and users can tell fixture data apart from live Canton.
 
 ### Demo accounts
 

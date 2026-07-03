@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { CheckCircle2, Send, Sparkles } from 'lucide-react'
 import { useReleaseWorkflow } from '@/context/ReleaseWorkflowContext'
 import { queryAssistant, type AssistantCitation } from '@/lib/api/assistant'
+import { hasBackendAuth, isLiveConfigured } from '@/lib/ledger/dataMode'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -33,7 +34,16 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
   const [verificationInitiated, setVerificationInitiated] = useState(false)
   const [conversationId, setConversationId] = useState<string | undefined>()
   const [loadingResponse, setLoadingResponse] = useState(false)
+  const [usingLiveBackend, setUsingLiveBackend] = useState(
+    () => isLiveConfigured() && hasBackendAuth(),
+  )
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const assistantModeLabel = (() => {
+    if (!isLiveConfigured()) return 'Demo data — mock mode'
+    if (!usingLiveBackend) return 'Demo data — backend not connected'
+    return 'Live Canton context'
+  })()
 
   function appendMessage(message: AssistantMessage) {
     setMessages((prev) => [...prev, message])
@@ -57,6 +67,7 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
         vaultId: DEMO_VAULT_ID,
       })
       setConversationId(response.conversationId)
+      setUsingLiveBackend(true)
       appendMessage({
         id: nextMessageId(),
         role: 'assistant',
@@ -64,11 +75,14 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
         citations: response.citations,
       })
     } catch {
+      setUsingLiveBackend(false)
       appendMessage({
         id: nextMessageId(),
         role: 'assistant',
         text: getAssistantResponse(trimmed),
-        citations: [{ label: 'local fallback', source: 'Scripted assistant response' }],
+        citations: [
+          { label: 'demo fallback', source: 'Demo data — backend not connected' },
+        ],
       })
     } finally {
       setLoadingResponse(false)
@@ -102,7 +116,7 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
           <Sparkles className="size-4 text-primary" />
           Archival Assistant
           <span className="ml-auto text-[0.55rem] font-normal text-muted-foreground normal-case">
-            Backend Active
+            {assistantModeLabel}
           </span>
         </CardTitle>
       </CardHeader>
@@ -184,8 +198,12 @@ export function ArchivalAssistant({ vaultName = 'My Will' }: ArchivalAssistantPr
           </Button>
         </form>
 
-        <p className="font-headline text-xs text-[var(--lv-success)]">
-          {loadingResponse ? 'Assistant retrieval: [RUNNING]' : 'Assistant backend: [STABLE]'}
+        <p className="font-headline text-xs text-muted-foreground">
+          {loadingResponse
+            ? 'Assistant retrieval: [RUNNING]'
+            : usingLiveBackend
+              ? 'Assistant: [LIVE CANTON CONTEXT]'
+              : 'Assistant: [DEMO DATA — BACKEND NOT CONNECTED]'}
         </p>
 
         <Button

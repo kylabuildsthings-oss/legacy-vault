@@ -27,7 +27,8 @@ export function VaultDetailPage() {
   if (scope.error) {
     return (
       <p className="text-destructive">
-        Ledger error: {scope.error}. Start ./scripts/dev-ledger.sh or set VITE_USE_MOCK_LEDGER=true.
+        Ledger error: {scope.error}. Start ./scripts/dev-ledger.sh and ./scripts/dev-api.sh, or set
+        VITE_USE_MOCK_LEDGER=true for demo fixtures.
       </p>
     )
   }

@@ -45,7 +45,7 @@ export async function authenticate(userId: string, password: string): Promise<Se
     saveApiToken(body.result.token)
     return body.result.user
   } catch {
-    // Keep mock-mode demos usable when the product backend is not running.
+    // Backend unreachable — allow UI-only demo login with fixture data.
     const localUser = authenticateLocalDemoUser(userId, password)
     if (!localUser) return null
     clearApiToken()

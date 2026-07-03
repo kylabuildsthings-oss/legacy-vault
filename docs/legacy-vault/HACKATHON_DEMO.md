@@ -29,14 +29,19 @@ This document is your single source for:
 
 ### Environment
 
-- [ ] Start dev server: `./scripts/dev-ui.sh` from repo root
+- [ ] **Terminal 1:** `./scripts/dev-ledger.sh` (Canton sandbox + JSON API)
+- [ ] **Terminal 2:** `./scripts/dev-api.sh` (product backend)
+- [ ] **Terminal 3:** `cp legacy-vault/ui/.env.example legacy-vault/ui/.env.local && ./scripts/dev-ui.sh`
+- [ ] Confirm UI shows **Live Canton Backend** badge (not Demo Data Mode)
 - [ ] Open http://localhost:5173
 - [ ] Browser zoom **100%**; hide bookmarks bar
 - [ ] Full-screen recording (1080p recommended)
 
 ### Reset demo state (before each take)
 
-Release workflow state persists in `sessionStorage` until logout.
+In **live Canton mode**, release state persists on the ledger. For a clean oracle/heir walkthrough, use a fresh sandbox or reset workflow contracts as needed.
+
+In **mock mode** (`VITE_USE_MOCK_LEDGER=true`), release workflow state persists in `sessionStorage` until logout:
 
 1. Click **Sign out** (clears session + release overrides)
 2. Log in fresh as `sarah.m`
@@ -285,18 +290,20 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 
 **Tracks:** — (honesty)
 
-**Headline:** Demo-ready frontend · roadmap for production
+**Headline:** Demo-ready product on Canton sandbox
 
 | Layer | Status |
 |-------|--------|
 | React UI — role scoping, release workflow, Track 1–3 screens | **Built** |
-| Mock fixtures + session-persisted release state | **Built** |
-| Archival Assistant (backend + Canton context) | **Built** |
-| Daml contracts on Canton | **Roadmap** |
+| Daml contracts on Canton sandbox (`Vault.daml`) | **Built** |
+| Backend API — auth, vaults, assistant, release, rename | **Built** |
+| UI → backend → Canton (live mode) | **Built** |
+| Archival Assistant (deterministic + Canton context) | **Built** |
+| API tests (42 passing) + Daml Script tests (5) | **Built** |
 | Optional LLM/RAG assistant provider | **Roadmap** |
-| Deployed live URL | **Submission task** |
+| Canton Network DevNet / deployed public URL | **Submission task** |
 
-**Speaker note:** Judges see product thinking and UI execution; backend is planned, not faked.
+**Speaker note:** Judges see a working Canton-backed product. Mock mode remains available for UI-only demos and is clearly labelled **Demo Data Mode**.
 
 ---
 
@@ -308,9 +315,9 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 
 | Criterion | How we deliver |
 |-----------|----------------|
-| **Technical execution** | Clean React architecture; role-scoped data layer; documented visibility matrix |
+| **Technical execution** | Daml contracts + Canton sandbox; backend API with 42 tests; role-scoped UI; **Live Canton Backend** badge in live mode |
 | **Originality** | Estate planning on Canton—not another generic DeFi app |
-| **UX & design** | Stitch-aligned institutional UI; privacy visualization judges can see |
+| **UX & design** | Stitch-aligned institutional UI; persistent live/demo mode badges; privacy visualization judges can see |
 | **Real-world applicability** | HNWI / trust company workflow; Forbes-cited visibility problem |
 
 ---
@@ -348,7 +355,8 @@ From Canton Network Hackathon requirements:
 - [ ] Video shows oracle confirm **before** heir payout
 - [ ] Video mentions or shows Archival Assistant (Track 3 agent)
 - [ ] Video shows Visibility Architecture / role contrast (Track 1)
-- [ ] Slide 10 honesty slide included (mock vs roadmap)
+- [ ] Slide 10 honesty slide included (built vs roadmap)
+- [ ] Video shows **Live Canton Backend** badge (or explain Demo Data Mode if recording mock)
 - [ ] `npm run build` passes in `legacy-vault/ui`
 
 ---
@@ -375,4 +383,4 @@ From Canton Network Hackathon requirements:
 
 ---
 
-*Last updated: Phase D — demo doc + pitch deck outline for Canton Network Hackathon multi-track submission.*
+*Last updated: live-mode-first docs + UI data-mode badges for Canton Network Hackathon multi-track submission.*
