@@ -23,6 +23,8 @@ This document is your single source for:
 
 **Primary demo vault:** `VLT-001` — *My Will* (Sarah Mitchell · Geneva, CH)
 
+**Public demo (judges, no install):** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) — Public Demo mode with sample data. Use the local stack below for the **3-minute live Canton video**.
+
 ---
 
 ## Part 1 — Pre-record checklist
@@ -330,8 +332,8 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 **Bullets:**
 
 - **GitHub:** [github.com/kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault)
-- **Demo video:** *(add link after recording)*
-- **Live product:** *(add URL when deployed)*
+- **Demo video:** *(add link after recording — update README For judges section and submission table)*
+- **Live product:** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Public Demo)
 - **Contact / team:** *(your details)*
 
 **Footer line (optional):** *Secured by Private Ledger* — matches app shell footer.
@@ -347,7 +349,7 @@ From Canton Network Hackathon requirements:
 | Public repository | ✅ | [kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault) |
 | Presentation deck | 🔄 | Build from Part 4; include Slide 4 hero table |
 | 3-minute video pitch w/ demo | 🔄 | Record using Part 2; hit all three tracks on screen |
-| Link to live product | 🔄 | Deploy frontend; add URL to Slide 12 |
+| Link to live product | ✅ | [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) |
 
 ### Before you submit
 
@@ -359,6 +361,10 @@ From Canton Network Hackathon requirements:
 - [ ] Slide 10 honesty slide included (built vs roadmap)
 - [ ] Video shows **Live Canton Backend** badge (or explain Demo Data Mode if recording mock)
 - [ ] `npm run build` passes in `legacy-vault/ui`
+
+### After recording — update README
+
+Replace the video placeholder in README **For judges** and **Hackathon submission** with your YouTube/Loom URL, then push to `main`.
 
 ---
 
