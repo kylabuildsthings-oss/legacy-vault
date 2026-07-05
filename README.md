@@ -40,7 +40,7 @@ flowchart TB
 
 **Product status:** Legacy Vault is a **complete hackathon-ready product** on the local Canton sandbox — React UI, backend API, Daml contracts, role-scoped vault workflows, Archival Assistant, vault create/rename on Canton, and **42 passing API tests** plus 5 Daml Script tests.
 
-**Submission remaining** (deliverables, not missing product features): public demo URL, 3-minute demo video, presentation deck. See [Hackathon submission](#hackathon-submission) below.
+**Submission remaining** (deliverables, not missing product features): 3-minute demo video, presentation deck. **Live demo:** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Demo Data Mode). See [Hackathon submission](#hackathon-submission) below.
 
 **Optional later:** Canton Network DevNet deployment and live LLM/RAG model (scaffold in place — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)).
 
@@ -175,7 +175,7 @@ In **live mode**, release state persists on Canton. In **Demo Data Mode**, sign 
 | Working product (local Canton stack) | Done — see [Quick start](#quick-start) |
 | Presentation deck | In progress |
 | 3-minute demo video | In progress |
-| Public demo URL | In progress — deploy UI + API |
+| Public demo URL | Done — [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Demo Data Mode; sign in as `sarah.m` / `vault`) |
 
 Demo script and pitch deck: [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md)
 
