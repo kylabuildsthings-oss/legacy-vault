@@ -14,9 +14,8 @@ dist-ssr/
 .DS_Store
 .idea
 
-# Daml build artifacts & codegen
+# Daml build artifacts (keep ui/src/generated/ in git for Vercel deploy)
 legacy-vault/.daml/
-legacy-vault/ui/src/generated/
 
 # Canton sandbox runtime logs
 legacy-vault/log/
