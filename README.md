@@ -10,6 +10,18 @@ HNWI wealth transfer needs privacy, tokenized asset coordination, and trusted re
 
 ---
 
+## For judges
+
+| Try this | Link |
+|----------|------|
+| **Public demo** (no install) | [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) — sign in `sarah.m` / `vault` |
+| **Live Canton stack** (technical review) | Clone repo → [Quick start](#quick-start) — 3 terminals, Java 17 + Daml SDK |
+| **Live ledger proof** | *(add 3-min video URL when recorded)* |
+
+The public URL runs **Public Demo** mode (sample data). Contracts and ledger writes are verified locally or in the demo video.
+
+---
+
 ## How Legacy Vault uses Canton
 
 Legacy Vault is a **Daml application** running on a **local Canton sandbox**—the same ledger protocol family as Canton Network, executed on your machine for development and demo.
@@ -40,7 +52,7 @@ flowchart TB
 
 **Product status:** Legacy Vault is a **complete hackathon-ready product** on the local Canton sandbox — React UI, backend API, Daml contracts, role-scoped vault workflows, Archival Assistant, vault create/rename on Canton, and **42 passing API tests** plus 5 Daml Script tests.
 
-**Submission remaining** (deliverables, not missing product features): 3-minute demo video, presentation deck. **Live demo:** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Demo Data Mode). See [Hackathon submission](#hackathon-submission) below.
+**Submission remaining** (deliverables, not missing product features): 3-minute demo video, presentation deck. **Public demo (ready now):** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login). See [For judges](#for-judges) and [Hackathon submission](#hackathon-submission) below.
 
 **Optional later:** Canton Network DevNet deployment and live LLM/RAG model (scaffold in place — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)).
 
@@ -175,7 +187,7 @@ In **live mode**, release state persists on Canton. In **Demo Data Mode**, sign 
 | Working product (local Canton stack) | Done — see [Quick start](#quick-start) |
 | Presentation deck | In progress |
 | 3-minute demo video | In progress |
-| Public demo URL | Done — [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Demo Data Mode; sign in as `sarah.m` / `vault`) |
+| Public demo URL | Done — [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Public Demo; sign in as `sarah.m` / `vault`) |
 
 Demo script and pitch deck: [HACKATHON_DEMO.md](docs/legacy-vault/HACKATHON_DEMO.md)
 
