@@ -285,7 +285,7 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 - **Backend API:** auth, vaults, assistant, release — **built** (`legacy-vault/api`)
 - References: [Canton docs](https://docs.canton.network/) · [Daml docs](https://docs.daml.com/)
 
-**Speaker note:** Contracts and backend are built and running on the local Canton sandbox; DevNet deployment is the submission follow-on.
+**Speaker note:** Contracts and backend run on the local Canton sandbox for the product demo; Canton DevNet proof is Encode Seaport deploy + create on **5N Sandbox** (hosted UI is not wired to DevNet).
 
 ---
 
@@ -304,7 +304,7 @@ Paste each slide block into your deck tool. **Track badges** show which hackatho
 | Archival Assistant (deterministic + Canton context) | **Built** |
 | API tests (42 passing) + Daml Script tests (5) | **Built** |
 | Optional LLM/RAG assistant provider | **Roadmap** |
-| Canton Network DevNet / deployed public URL | **Submission task** |
+| Canton Network DevNet (Seaport → 5N Sandbox) | **Done** — DAR deploy + `VaultAgreement` create; UI→DevNet wiring is roadmap |
 
 **Speaker note:** Judges see a working Canton-backed product. Mock mode remains available for UI-only demos and is clearly labelled **Demo Data Mode**.
 
@@ -347,6 +347,7 @@ From Canton Network Hackathon requirements:
 | Requirement | Status | Action |
 |-------------|--------|--------|
 | Public repository | ✅ | [kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault) |
+| Canton DevNet (not LocalNet-only) | ✅ | Seaport → 5N Sandbox — DAR + `VaultAgreement` (see README) |
 | Presentation deck | 🔄 | Build from Part 4; include Slide 4 hero table |
 | 3-minute video pitch w/ demo | 🔄 | Record using Part 2; hit all three tracks on screen |
 | Link to live product | ✅ | [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) |

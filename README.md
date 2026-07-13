@@ -16,15 +16,22 @@ HNWI wealth transfer needs privacy, tokenized asset coordination, and trusted re
 |----------|------|
 | **Public demo** (no install) | [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) — sign in `sarah.m` / `vault` |
 | **Live Canton stack** (technical review) | Clone repo → [Quick start](#quick-start) — 3 terminals, Java 17 + Daml SDK |
-| **Live ledger proof** | *(add 3-min video URL when recorded)* |
+| **Canton DevNet proof** | Encode [Seaport](https://app.devnet.seaport.to) → **5N Sandbox** — DAR `legacy-vault-0.0.1.dar` + live `VaultAgreement` — see [Canton DevNet](#canton-devnet-encode-seaport) |
+| **Demo video** | *(add 3-min video URL when recorded)* |
 
-The public URL runs **Public Demo** mode (sample data). Contracts and ledger writes are verified locally or in the demo video.
+**How to read the surfaces:** Vercel is **Public Demo** (sample data). The local stack is **Live Canton Backend** for the full product workflow. **DevNet** on-ledger proof is Seaport create/exercise on **5N Sandbox** — the hosted UI is **not** wired to DevNet (same `Vault.daml` model, separate runtimes).
 
 ---
 
 ## How Legacy Vault uses Canton
 
-Legacy Vault is a **Daml application** running on a **local Canton sandbox**—the same ledger protocol family as Canton Network, executed on your machine for development and demo.
+Legacy Vault is a **Daml application** on the Canton protocol family with **three surfaces** that share the same contract model ([`Vault.daml`](legacy-vault/daml/Vault.daml)):
+
+1. **Local Canton sandbox** — full UI → API → ledger for development and the demo video  
+2. **Public demo (Vercel)** — product UX without requiring judges to install the stack  
+3. **Canton DevNet (Encode Seaport)** — DAR deployed and contracts created on the shared **5N Sandbox** validator  
+
+### Product / local live stack
 
 ```mermaid
 flowchart TB
@@ -32,7 +39,7 @@ flowchart TB
   API["Legacy Vault API :4000"]
   JSON["Daml JSON API :7575"]
   Canton["Canton sandbox"]
-  Daml["Vault.daml .dar"]
+  Daml["Vault.daml"]
 
   UI -->|"Bearer session + REST"| API
   API -->|"server-side JWT"| JSON
@@ -50,11 +57,46 @@ flowchart TB
 
 **Developer fallback:** set `VITE_USE_MOCK_LEDGER=true` in `legacy-vault/ui/.env.local` to run UI-only with mock fixtures (no Canton/backend required).
 
-**Product status:** Legacy Vault is a **complete hackathon-ready product** on the local Canton sandbox — React UI, backend API, Daml contracts, role-scoped vault workflows, Archival Assistant, vault create/rename on Canton, and **42 passing API tests** plus 5 Daml Script tests.
+### Canton DevNet proof (Encode Seaport)
 
-**Submission remaining** (deliverables, not missing product features): 3-minute demo video, presentation deck. **Public demo (ready now):** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login). See [For judges](#for-judges) and [Hackathon submission](#hackathon-submission) below.
+```mermaid
+flowchart LR
+  Loop["Loop DevNet wallet"]
+  Seaport["Seaport Encode Hackathon"]
+  Build["Build DAR SDK 3.4.x"]
+  Val["5N Sandbox"]
+  Contract["VaultAgreement on ledger"]
 
-**Optional later:** Canton Network DevNet deployment and live LLM/RAG model (scaffold in place — [ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)).
+  Loop -->|"org login"| Seaport
+  Seaport --> Build --> Val --> Contract
+```
+
+| Piece | Detail |
+|-------|--------|
+| **Workspace** | Encode Hackathon org on [app.devnet.seaport.to](https://app.devnet.seaport.to) |
+| **Validator** | **5N Sandbox** (development) |
+| **DAR** | `legacy-vault-0.0.1.dar` (built in Seaport; local repo SDK 2.2 DAR is for sandbox only) |
+| **On-ledger** | `VaultAgreement` created (e.g. `VLT-DEVNET-001`) |
+| **actAs** | Use the Seaport **5N Sandbox actAs** party for create/exercise — not the Loop login Party ID alone |
+
+Vercel and the local UI do **not** submit transactions to 5N Sandbox. DevNet compliance is the Seaport deploy + create (and optional exercise) path.
+
+### Canton DevNet (Encode Seaport)
+
+Encode requires projects **deployed live on Canton DevNet** (LocalNet/sandbox alone does not qualify). Legacy Vault meets that via Seaport:
+
+1. Join **Encode Hackathon** in Seaport (Loop DevNet Party ID invited by organizers)  
+2. **New Blank Project** → paste [`Vault.daml`](legacy-vault/daml/Vault.daml) → keep Seaport `daml.yaml` SDK (**3.4.11**) → **Build Project**  
+3. **Deploy** `legacy-vault-0.0.1.dar` → **5N Sandbox**  
+4. **Create Contract** → template `VaultAgreement` using the sandbox **actAs** party for testator / oracle / admin  
+
+Local `daml.yaml` remains **SDK 2.2** for the sandbox quick start. Seaport rebuilds the DAR for DevNet’s newer LF format (an SDK 2.2 `.dar` upload fails Inspect with “no valid dalf”).
+
+**Product status:** Complete hackathon product on the local Canton sandbox — React UI, backend API, Daml contracts, role-scoped workflows, Archival Assistant, vault create/rename on Canton, **42** API tests + **5** Daml Script tests — plus **Canton DevNet** DAR deploy and live contract on **5N Sandbox**.
+
+**Submission remaining** (deliverables): 3-minute demo video, presentation deck. **Public demo:** [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login). See [Hackathon submission](#hackathon-submission).
+
+**Optional later:** Wire the hosted UI/API to DevNet Ledger API; live LLM/RAG assistant ([ASSISTANT_RAG_PLAN.md](docs/legacy-vault/ASSISTANT_RAG_PLAN.md)).
 
 Contract design: [CONTRACT_SPEC.md](docs/legacy-vault/CONTRACT_SPEC.md) · UI wiring: [UI_LEDGER_INTEGRATION.md](docs/legacy-vault/UI_LEDGER_INTEGRATION.md)
 
@@ -96,7 +138,7 @@ Four parties, one workflow:
 | Criterion | How Legacy Vault delivers |
 |-----------|---------------------------|
 | **Challenge fit** | One institutional workflow spanning Tracks 1–3: Canton privacy, tokenized RWAs, and agent-led oracle settlement |
-| **Technical execution** | Daml contracts + 5 Script tests; backend API with 42 tests; UI → API → Canton live stack; `npm run build` passes |
+| **Technical execution** | Daml contracts + 5 Script tests; backend API with 42 tests; UI → API → Canton live stack; Seaport DevNet DAR + contract create; `npm run build` passes |
 | **Institutional relevance** | HNWI estate planning, law-firm oracle, trust administrator — privacy-sensitive wealth transfer on Canton |
 | **Product clarity** | Live-first README and demo flow; **Live Canton Backend** / **Demo Data Mode** badges; role-scoped UI judges can follow |
 
@@ -119,6 +161,7 @@ Four parties, one workflow:
 | UI → backend API (live mode) | Included — UI does not call Canton directly |
 | Vault create / rename on Canton | Included — `POST /vaults` · `PATCH /vaults/:vaultId` |
 | Archival Assistant (deterministic + Canton context) | Included — [ASSISTANT.md](docs/legacy-vault/ASSISTANT.md) |
+| Canton DevNet (Seaport → 5N Sandbox) | Included — DAR deploy + `VaultAgreement` create — [DevNet](#canton-devnet-encode-seaport) |
 | Postgres persistence (optional) | Included — `./scripts/db-migrate.sh` |
 | API hardening + tests | Included — [PHASE8_HARDENING.md](docs/legacy-vault/PHASE8_HARDENING.md) |
 
@@ -185,6 +228,7 @@ In **live mode**, release state persists on Canton. In **Demo Data Mode**, sign 
 |-------------|--------|
 | Public repository | Done — [github.com/kylabuildsthings-oss/legacy-vault](https://github.com/kylabuildsthings-oss/legacy-vault) |
 | Working product (local Canton stack) | Done — see [Quick start](#quick-start) |
+| Canton DevNet deployment | Done — Encode Seaport → **5N Sandbox** (`legacy-vault-0.0.1.dar` + `VaultAgreement`) — [DevNet](#canton-devnet-encode-seaport) |
 | Presentation deck | In progress |
 | 3-minute demo video | In progress |
 | Public demo URL | Done — [legacy-vault-eta.vercel.app/login](https://legacy-vault-eta.vercel.app/login) (Public Demo; sign in as `sarah.m` / `vault`) |
